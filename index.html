@@ -1,0 +1,768 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>AMM Solution Engineering</title>
+<link rel="icon" type="image/png" href="Logo.png">
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Jost:wght@300;400;500&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --ink:#111210;
+  --ink-soft:#5a5c57;
+  --ink-faint:#9a9c96;
+  --cream:#f6f4ef;
+  --white:#ffffff;
+  --amber:#b87c2a;
+  --amber-pale:#f2e8d5;
+  --rule:rgba(17,18,16,0.10);
+  --dark:#1a1c17;
+}
+html{scroll-behavior:smooth}
+body{
+  font-family:'Jost',sans-serif;
+  background:var(--cream);
+  color:var(--ink);
+  font-size:16px;
+  line-height:1.65;
+  overflow-x:hidden;
+}
+
+/* ── NAV ── */
+nav{
+  position:fixed;top:0;left:0;right:0;z-index:200;
+  display:flex;align-items:center;justify-content:space-between;
+  padding:1.25rem 6vw;
+  background:rgba(246,244,239,0.94);
+  backdrop-filter:blur(14px);
+  border-bottom:1px solid var(--rule);
+}
+.nav-logo{
+  font-family:'Cormorant Garamond',serif;
+  font-weight:600;font-size:1.65rem;
+  color:var(--ink);text-decoration:none;
+  letter-spacing:0.04em;
+}
+.nav-logo em{font-style:normal;color:var(--amber)}
+.nav-links{display:flex;gap:2.4rem;list-style:none}
+.nav-links a{
+  font-size:0.78rem;font-weight:400;
+  letter-spacing:0.12em;text-transform:uppercase;
+  color:var(--ink-soft);text-decoration:none;
+  transition:color 0.2s;
+}
+.nav-links a:hover{color:var(--amber)}
+
+/* ── SHARED BAND STYLES ── */
+.band{width:100%;padding:6rem 6vw}
+.band-narrow{max-width:760px;margin:0 auto}
+.band-wide{max-width:1200px;margin:0 auto}
+.eyebrow{
+  display:inline-block;
+  font-size:0.7rem;font-weight:500;
+  letter-spacing:0.18em;text-transform:uppercase;
+  color:var(--amber);margin-bottom:1.4rem;
+}
+h1,h2{
+  font-family:'Cormorant Garamond',serif;
+  font-weight:300;line-height:1.1;
+}
+h1{font-size:clamp(3rem,5.5vw,5.2rem);color:var(--ink)}
+h2{font-size:clamp(2rem,3.5vw,3.2rem);color:var(--ink)}
+.lede{
+  font-size:1.05rem;font-weight:300;
+  color:var(--ink-soft);line-height:1.8;
+  max-width:580px;
+}
+.divider{
+  width:48px;height:1px;
+  background:var(--amber);
+  margin:2rem 0;
+}
+
+/* ── HERO BAND ── */
+#hero{
+  width:100%;
+  min-height:100vh;
+  padding-top:80px;
+  background:var(--dark);
+  position:relative;
+  overflow:hidden;
+  display:flex;flex-direction:column;justify-content:flex-end;
+}
+.hero-img{
+  position:absolute;inset:0;
+  background:url('https://images.unsplash.com/photo-1581094794329-c8112a89af12?w=1600&q=80') center/cover no-repeat;
+  opacity:0.38;
+}
+.hero-img-overlay{
+  position:absolute;inset:0;
+  background:linear-gradient(to top, rgba(26,28,23,0.98) 0%, rgba(26,28,23,0.55) 60%, rgba(26,28,23,0.3) 100%);
+}
+.hero-content{
+  position:relative;z-index:2;
+  padding:5rem 6vw 6rem;
+  max-width:900px;
+}
+.hero-content .eyebrow{color:rgba(184,124,42,0.85)}
+.hero-logo{
+  width:320px;max-width:70vw;
+  filter:invert(1) brightness(1);
+  margin-bottom:2.2rem;
+  display:block;
+}
+.hero-content h1{
+  color:#fff;
+  font-style:italic;
+  margin-bottom:1.6rem;
+}
+.hero-content h1 span{font-style:normal}
+.hero-content .lede{color:rgba(255,255,255,0.5);max-width:520px;margin-bottom:2.8rem}
+.hero-cta{
+  display:flex;gap:1.2rem;flex-wrap:wrap;
+  animation:fadeUp 0.8s 0.4s ease both;
+}
+.btn{
+  font-family:'Jost',sans-serif;
+  font-size:0.78rem;font-weight:500;
+  letter-spacing:0.12em;text-transform:uppercase;
+  padding:13px 28px;
+  border-radius:1px;
+  text-decoration:none;
+  transition:all 0.2s;
+  cursor:pointer;border:none;
+}
+.btn-light{background:#fff;color:var(--dark)}
+.btn-light:hover{background:var(--amber-pale);color:var(--amber)}
+.btn-ghost{background:transparent;color:#fff;border:1px solid rgba(255,255,255,0.3)}
+.btn-ghost:hover{border-color:#fff;background:rgba(255,255,255,0.06)}
+.hero-scroll{
+  position:absolute;bottom:2.5rem;right:6vw;z-index:2;
+  display:flex;flex-direction:column;align-items:center;gap:8px;
+}
+.hero-scroll span{font-size:0.65rem;letter-spacing:0.16em;text-transform:uppercase;color:rgba(255,255,255,0.3)}
+.scroll-line{width:1px;height:48px;background:rgba(255,255,255,0.2)}
+
+/* ── INTRO BAND ── */
+#intro{
+  background:var(--white);
+  border-bottom:1px solid var(--rule);
+}
+#intro .band-narrow{
+  display:grid;grid-template-columns:1fr 2px 1fr;gap:4rem;align-items:start;
+  max-width:900px;
+}
+.intro-rule{width:1px;background:var(--rule);height:100%;min-height:60px}
+.intro-col p{font-size:1rem;font-weight:300;color:var(--ink-soft);line-height:1.8}
+.intro-col h2{font-size:clamp(1.5rem,2.5vw,2.2rem);margin-bottom:1rem}
+
+/* ── MY SERVICES ── */
+#offer{background:var(--cream)}
+#offer .band{padding-bottom:0}
+#offer .section-head{margin-bottom:0}
+.services-rows{width:100%;border-top:1px solid var(--rule);margin-top:3rem}
+.service-row{
+  width:100%;
+  border-bottom:1px solid var(--rule);
+  transition:background 0.25s;
+}
+.service-row:hover{background:var(--white)}
+.service-row-inner{
+  display:grid;
+  grid-template-columns:280px 1fr;
+  gap:4rem;
+  align-items:start;
+  padding:3rem 6vw;
+  max-width:1200px;
+  margin:0 auto;
+}
+.service-row-left{
+  display:flex;
+  flex-direction:column;
+  gap:0.6rem;
+  padding-top:0.2rem;
+}
+.service-row-num{
+  font-family:'Cormorant Garamond',serif;
+  font-size:0.85rem;font-weight:400;
+  letter-spacing:0.18em;
+  color:var(--amber);
+  display:block;
+}
+.service-row-left h3{
+  font-family:'Cormorant Garamond',serif;
+  font-weight:400;font-size:1.7rem;
+  color:var(--ink);line-height:1.2;
+}
+.service-row-right p{
+  font-size:0.95rem;font-weight:300;
+  color:var(--ink-soft);line-height:1.8;
+  margin-bottom:1.4rem;
+  max-width:620px;
+}
+.service-tags{
+  display:flex;flex-wrap:wrap;gap:8px;
+}
+.service-tags span{
+  font-size:0.72rem;font-weight:400;
+  letter-spacing:0.08em;
+  color:var(--amber);
+  border:1px solid rgba(184,124,42,0.35);
+  padding:5px 12px;
+  border-radius:1px;
+  background:var(--amber-pale);
+}
+
+/* ── IMAGE BAND ── */
+#imagery{
+  width:100%;
+  display:grid;
+  grid-template-columns:1fr 1fr 1fr;
+  height:460px;
+}
+.img-panel{
+  overflow:hidden;
+  position:relative;
+}
+.img-panel img{
+  width:100%;height:100%;
+  object-fit:cover;
+  transition:transform 0.7s ease;
+  filter:saturate(0.6) brightness(0.88);
+}
+.img-panel:hover img{transform:scale(1.04);filter:saturate(0.8) brightness(0.95)}
+.img-panel-caption{
+  position:absolute;bottom:0;left:0;right:0;
+  padding:1.2rem 1.5rem;
+  background:linear-gradient(transparent, rgba(0,0,0,0.65));
+  font-size:0.72rem;font-weight:400;
+  letter-spacing:0.1em;text-transform:uppercase;
+  color:rgba(255,255,255,0.65);
+}
+
+/* ── APPROACH BAND ── */
+#approach{
+  background:var(--dark);
+  color:#fff;
+}
+#approach .band-wide{
+  display:grid;grid-template-columns:1fr 1fr;gap:8rem;align-items:center;
+}
+#approach .eyebrow{color:var(--amber);opacity:0.7}
+#approach h2{color:#fff;margin-bottom:1.5rem}
+#approach .lede{color:rgba(255,255,255,0.45);max-width:100%}
+.approach-steps{display:flex;flex-direction:column;gap:0}
+.approach-step{
+  display:flex;gap:1.8rem;
+  padding:1.8rem 0;
+  border-bottom:1px solid rgba(255,255,255,0.07);
+  align-items:flex-start;
+}
+.approach-step:last-child{border-bottom:none}
+.step-n{
+  font-family:'Cormorant Garamond',serif;
+  font-size:1.6rem;font-weight:300;
+  color:var(--amber);opacity:0.6;
+  min-width:32px;line-height:1;
+  margin-top:3px;
+}
+.step-body h4{
+  font-family:'Jost',sans-serif;
+  font-size:0.88rem;font-weight:500;
+  letter-spacing:0.06em;
+  color:rgba(255,255,255,0.85);
+  margin-bottom:0.4rem;
+  text-transform:uppercase;
+}
+.step-body p{font-size:0.88rem;font-weight:300;color:rgba(255,255,255,0.38);line-height:1.7}
+
+/* ── SECTORS BAND ── */
+#sectors{background:var(--white)}
+#sectors .section-head{margin-bottom:3rem}
+.sectors-row{
+  display:grid;
+  grid-template-columns:repeat(5, 1fr);
+  border-top:1px solid var(--rule);
+  border-left:1px solid var(--rule);
+}
+.sector-tag{
+  padding:1.4rem 1.6rem;
+  border-right:1px solid var(--rule);
+  border-bottom:1px solid var(--rule);
+  font-size:0.8rem;font-weight:400;
+  letter-spacing:0.08em;
+  color:var(--ink-soft);
+  transition:background 0.2s,color 0.2s;
+  cursor:default;
+  text-align:center;
+}
+.sector-tag:hover{background:var(--amber-pale);color:var(--amber)}
+
+/* ── CONTACT BAND ── */
+#contact{background:var(--cream);border-top:1px solid var(--rule)}
+#contact .band-wide{
+  display:grid;grid-template-columns:1fr 1fr;gap:8rem;align-items:start;
+}
+.contact-left h2{margin-bottom:1.2rem}
+.contact-left p{font-size:0.97rem;font-weight:300;color:var(--ink-soft);line-height:1.8;margin-bottom:2rem}
+.contact-details{display:flex;flex-direction:column;gap:0.8rem}
+.contact-detail{
+  display:flex;gap:1rem;align-items:center;
+  font-size:0.88rem;font-weight:300;color:var(--ink-soft);
+}
+.contact-detail-icon{
+  width:32px;height:32px;
+  border:1px solid var(--rule);
+  border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  font-size:0.85rem;flex-shrink:0;
+}
+.contact-right form{display:flex;flex-direction:column;gap:1.1rem}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:1.1rem}
+.form-group{display:flex;flex-direction:column;gap:6px}
+label{
+  font-size:0.7rem;font-weight:500;
+  letter-spacing:0.12em;text-transform:uppercase;
+  color:var(--ink-faint);
+}
+input,textarea{
+  background:var(--white);
+  border:1px solid var(--rule);
+  padding:11px 14px;
+  font-family:'Jost',sans-serif;
+  font-size:0.9rem;font-weight:300;
+  color:var(--ink);
+  outline:none;
+  border-radius:1px;
+  transition:border-color 0.2s;
+  resize:none;
+}
+input:focus,textarea:focus{border-color:var(--amber)}
+input::placeholder,textarea::placeholder{color:var(--ink-faint)}
+.btn-submit{
+  background:var(--dark);
+  color:#fff;
+  padding:13px 32px;
+  font-family:'Jost',sans-serif;
+  font-size:0.78rem;font-weight:500;
+  letter-spacing:0.12em;text-transform:uppercase;
+  border:none;border-radius:1px;
+  cursor:pointer;
+  align-self:flex-start;
+  transition:background 0.2s;
+}
+.btn-submit:hover{background:var(--amber)}
+
+/* ── FOOTER ── */
+footer{
+  background:var(--dark);
+  padding:2rem 6vw;
+  display:flex;align-items:center;justify-content:space-between;
+  flex-wrap:wrap;gap:1rem;
+}
+.footer-logo{
+  font-family:'Cormorant Garamond',serif;
+  font-weight:600;font-size:1rem;
+  color:rgba(255,255,255,0.4);
+  text-decoration:none;
+  letter-spacing:0.04em;
+}
+.footer-logo em{font-style:normal;color:var(--amber)}
+footer p{font-size:0.75rem;color:rgba(255,255,255,0.2);font-weight:300}
+
+/* ── ANIMATIONS ── */
+@keyframes fadeUp{
+  from{opacity:0;transform:translateY(20px)}
+  to{opacity:1;transform:translateY(0)}
+}
+.hero-content>*{opacity:0;animation:fadeUp 0.75s ease both}
+.hero-content>*:nth-child(1){animation-delay:0.05s}
+.hero-content>*:nth-child(2){animation-delay:0.18s}
+.hero-content>*:nth-child(3){animation-delay:0.3s}
+.hero-content>*:nth-child(4){animation-delay:0.44s}
+
+/* ── RESPONSIVE ── */
+@media(max-width:860px){
+  #intro .band-narrow{grid-template-columns:1fr;gap:2rem}
+  .intro-rule{display:none}
+  #imagery{grid-template-columns:1fr;height:auto}
+  .img-panel{height:260px}
+  #approach .band-wide{grid-template-columns:1fr;gap:3rem}
+  #contact .band-wide{grid-template-columns:1fr;gap:3rem}
+  .form-row{grid-template-columns:1fr}
+  /* Service rows stack on mobile */
+  .service-row-inner{
+    grid-template-columns:1fr;
+    gap:1.2rem;
+    padding:2rem 6vw;
+  }
+  .service-row-left{flex-direction:row;align-items:baseline;gap:1rem}
+  .service-row-left h3{font-size:1.35rem}
+  .service-tags{gap:6px}
+  .service-tags span{font-size:0.68rem;padding:4px 10px}
+  /* Sectors grid to 2 columns on tablet */
+  .sectors-row{grid-template-columns:repeat(2,1fr)}
+}
+@media(max-width:560px){
+  .nav-links{display:none}
+  .nav-logo{font-size:1.1rem}
+  h1{font-size:2.2rem}
+  h2{font-size:1.6rem}
+  .hero-content{padding:3rem 6vw 4rem}
+  .lede{font-size:0.92rem}
+  .band{padding:4rem 6vw}
+  /* Sectors grid to 2 columns on mobile */
+  .sectors-row{grid-template-columns:repeat(2,1fr)}
+  .sector-tag{font-size:0.72rem;padding:1rem 0.8rem;text-align:center}
+  /* Service rows fully stacked */
+  .service-row-inner{
+    grid-template-columns:1fr;
+    gap:1rem;
+    padding:1.8rem 6vw;
+  }
+  .service-row-left{flex-direction:column;gap:0.3rem}
+  .service-row-left h3{font-size:1.25rem}
+  .service-row-right p{font-size:0.88rem}
+  .service-tags{gap:5px}
+  .service-tags span{font-size:0.66rem;padding:4px 8px}
+  /* Approach steps */
+  .approach-step{gap:1rem}
+  /* Contact */
+  .btn-submit{width:100%}
+  .hero-cta{flex-direction:column}
+  .btn{text-align:center}
+}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <a href="#hero" class="nav-logo">AMM<em>.</em> Solution Engineering</a>
+  <ul class="nav-links">
+    <li><a href="#offer">Services</a></li>
+    <li><a href="#approach">Approach</a></li>
+    <li><a href="#contact">Contact</a></li>
+  </ul>
+</nav>
+
+<!-- ── HERO BAND ── -->
+<section id="hero">
+  <div class="hero-img"></div>
+  <div class="hero-img-overlay"></div>
+  <div class="hero-content">
+    <h1>Engineering solutions<br>shaped around you.</h1>
+    <p class="lede">I listen to what you need and translate it into practical engineering — whether that means integrating sensors, writing firmware, or simply showing up and getting something fixed.</p>
+    <div class="hero-cta">
+      <a href="#contact" class="btn btn-light">Start a conversation</a>
+      <a href="#offer" class="btn btn-ghost">What I offer</a>
+    </div>
+  </div>
+  <div class="hero-scroll">
+    <span>Scroll</span>
+    <div class="scroll-line"></div>
+  </div>
+</section>
+
+<!-- ── INTRO BAND ── -->
+<section id="intro">
+  <div class="band">
+    <div class="band-narrow">
+      <div class="intro-col">
+        <h2>A fresh perspective on engineering</h2>
+        <div class="divider"></div>
+      </div>
+      <div class="intro-rule"></div>
+      <div class="intro-col">
+        <p>AMM Solution Engineering helps clients with their challenges — whatever form those take. That might mean using microcontrollers to read and visualise data from industrial sensors, or it might mean something more hands-on: working at heights, carrying out preventive or corrective maintenance, or finding a simple fix to a recurring problem. The goal is always the same — to understand what you actually need, and to help you get there.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── SERVICES BAND ── -->
+<section id="offer">
+  <div class="band">
+    <div class="band-wide">
+      <div class="section-head">
+        <div class="eyebrow">What I offer</div>
+        <h2>My services</h2>
+      </div>
+    </div>
+  </div>
+  <div class="services-rows">
+
+    <div class="service-row">
+      <div class="service-row-inner band-wide">
+        <div class="service-row-left">
+          <span class="service-row-num">01</span>
+          <h3>Service Engineering</h3>
+        </div>
+        <div class="service-row-right">
+          <p>Every client has different needs, and I adapt to them. Whether it's an installation, a repair, or ongoing maintenance, I approach each job practically and without unnecessary complexity. I listen first, then get to work.</p>
+          <div class="service-tags">
+            <span>Installation</span>
+            <span>Repairs</span>
+            <span>Corrective maintenance</span>
+            <span>Preventive maintenance</span>
+            <span>Tailored to your setup</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="service-row">
+      <div class="service-row-inner band-wide">
+        <div class="service-row-left">
+          <span class="service-row-num">02</span>
+          <h3>Working at Heights</h3>
+        </div>
+        <div class="service-row-right">
+          <p>I am comfortable and qualified to work at height — whether that means installing equipment on elevated structures, inspecting hard-to-reach areas, or carrying out maintenance where others can't easily go.</p>
+          <div class="service-tags">
+            <span>Elevated structures</span>
+            <span>Inspection</span>
+            <span>Installation at height</span>
+            <span>Maintenance at height</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="service-row">
+      <div class="service-row-inner band-wide">
+        <div class="service-row-left">
+          <span class="service-row-num">03</span>
+          <h3>Making the Invisible Visible</h3>
+        </div>
+        <div class="service-row-right">
+          <p>A lot of what happens inside a facility goes unnoticed until something goes wrong. I help clients capture and display data that was previously invisible — giving you a clearer picture of what's actually happening in your environment.</p>
+          <div class="service-tags">
+            <span>Temperature</span>
+            <span>Humidity</span>
+            <span>Vibration</span>
+            <span>Pressure</span>
+            <span>Sensor integration</span>
+            <span>Data visualisation</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="service-row">
+      <div class="service-row-inner band-wide">
+        <div class="service-row-left">
+          <span class="service-row-num">04</span>
+          <h3>Hands-On Technical Work</h3>
+        </div>
+        <div class="service-row-right">
+          <p>I enjoy the practical side of engineering. Beyond consulting and systems work, I'm available for hands-on tasks — wiring, assembly, commissioning, troubleshooting on the floor. If something needs doing, I'm not afraid to do it myself.</p>
+          <div class="service-tags">
+            <span>Wiring & cabling</span>
+            <span>Assembly</span>
+            <span>Commissioning</span>
+            <span>On-site troubleshooting</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="service-row">
+      <div class="service-row-inner band-wide">
+        <div class="service-row-left">
+          <span class="service-row-num">05</span>
+          <h3>Standby Services</h3>
+        </div>
+        <div class="service-row-right">
+          <p>I offer standby arrangements tailored to what your operations require — whether that means being on-call for technical issues, being present during critical events or periods, or providing a planned maintenance contract so problems are caught before they happen.</p>
+          <div class="service-tags">
+            <span>On-call support</span>
+            <span>Operational presence</span>
+            <span>Planned maintenance contracts</span>
+            <span>Remote or onsite</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ── IMAGE BAND ── -->
+<section id="imagery">
+  <div class="img-panel">
+    <img src="https://images.unsplash.com/photo-1530124566582-a618bc2615dc?w=800&q=75" alt="Collection of hand tools" loading="lazy"/>
+    <div class="img-panel-caption">Service engineering</div>
+  </div>
+  <div class="img-panel">
+    <img src="https://images.unsplash.com/photo-1513828583688-c52646db42da?w=800&q=75" alt="Industrial facility interior" loading="lazy"/>
+    <div class="img-panel-caption">Sensor integration</div>
+  </div>
+  <div class="img-panel">
+    <img src="https://images.unsplash.com/photo-1642864258915-fa204759b23f?w=800&q=75" alt="Boom lift hoogtewerker" loading="lazy"/>
+    <div class="img-panel-caption">Working at heights</div>
+  </div>
+</section>
+
+<!-- ── APPROACH BAND ── -->
+<section id="approach">
+  <div class="band">
+    <div class="band-wide">
+      <div>
+        <div class="eyebrow">How I work</div>
+        <h2>My approach</h2>
+        <div class="divider" style="background:rgba(184,124,42,0.45)"></div>
+        <p class="lede">I believe in honest communication and realistic expectations. As a one-person operation, I focus on doing things thoughtfully rather than overpromising. Every engagement starts with listening.</p>
+      </div>
+      <div class="approach-steps">
+        <div class="approach-step">
+          <span class="step-n">1</span>
+          <div class="step-body">
+            <h4>Listen & understand</h4>
+            <p>I take time to understand your setup, your constraints, and what you actually need — before suggesting anything.</p>
+          </div>
+        </div>
+        <div class="approach-step">
+          <span class="step-n">2</span>
+          <div class="step-body">
+            <h4>Propose clearly</h4>
+            <p>I lay out options in plain language with honest cost and effort estimates — no jargon, no hidden complexity.</p>
+          </div>
+        </div>
+        <div class="approach-step">
+          <span class="step-n">3</span>
+          <div class="step-body">
+            <h4>Build carefully</h4>
+            <p>I develop, test, and iterate with care — keeping you informed at each stage and adapting when needed.</p>
+          </div>
+        </div>
+        <div class="approach-step">
+          <span class="step-n">4</span>
+          <div class="step-body">
+            <h4>Hand over well</h4>
+            <p>Delivery includes documentation and a proper handover so you can maintain and build on what was created.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── SECTORS BAND ── -->
+<section id="sectors">
+  <div class="band">
+    <div class="band-wide">
+      <div class="section-head" style="margin-bottom:2rem">
+        <div class="eyebrow">Industries</div>
+        <h2>Sectors I can help</h2>
+      </div>
+      <div class="sectors-row">
+        <div class="sector-tag">Manufacturing & Production</div>
+        <div class="sector-tag">Food & Beverage Processing</div>
+        <div class="sector-tag">HVAC & Building Systems</div>
+        <div class="sector-tag">Water & Waste Treatment</div>
+        <div class="sector-tag">Agricultural Technology</div>
+        <div class="sector-tag">Airport & Aviation Infrastructure</div>
+        <div class="sector-tag">Research & Laboratories</div>
+        <div class="sector-tag">Logistics & Warehousing</div>
+        <div class="sector-tag">Startups & Prototyping</div>
+        <div class="sector-tag">Small Industrial Facilities</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── CONTACT BAND ── -->
+<section id="contact">
+  <div class="band">
+    <div class="band-wide">
+      <div class="contact-left">
+        <div class="eyebrow">Get in touch</div>
+        <h2>Let's talk about your project</h2>
+        <div class="divider"></div>
+        <p>Whether you have a clear brief or just an idea you'd like to explore, I'm happy to have an informal conversation. There's no obligation — just an honest exchange to see if I can be of help.</p>
+        <div class="contact-details">
+          <div class="contact-detail">
+            <div class="contact-detail-icon">✉</div>
+            <span>miguel.medina@amm-se.be</span>
+          </div>
+          <div class="contact-detail">
+            <div class="contact-detail-icon">☎</div>
+            <span>+32 473 21 17 83</span>
+          </div>
+          <div class="contact-detail">
+            <div class="contact-detail-icon">◎</div>
+            <span>Brussels, Belgium</span>
+          </div>
+        </div>
+      </div>
+      <div class="contact-right">
+        <form onsubmit="handleSubmit(event)">
+          <div class="form-row">
+            <div class="form-group">
+              <label>First name</label>
+              <input type="text" id="fname" placeholder="John" required/>
+            </div>
+            <div class="form-group">
+              <label>Last name</label>
+              <input type="text" id="lname" placeholder="Smith" required/>
+            </div>
+          </div>
+          <div class="form-group">
+            <label>Email</label>
+            <input type="email" id="email" placeholder="john@company.com" required/>
+          </div>
+          <div class="form-group">
+            <label>Company (optional)</label>
+            <input type="text" id="company" placeholder="Your company"/>
+          </div>
+          <div class="form-group">
+            <label>Your message</label>
+            <textarea rows="5" id="message" placeholder="Tell me a little about what you're working on..." required></textarea>
+          </div>
+          <button type="submit" class="btn-submit">Send message</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <a href="#hero" class="footer-logo">AMM<em>.</em> Solution Engineering</a>
+  <p>© 2025 AMM Solution Engineering — Brussels, Belgium</p>
+</footer>
+
+<script>
+function handleSubmit(e){
+  e.preventDefault();
+  const fname = document.getElementById('fname').value.trim();
+  const lname = document.getElementById('lname').value.trim();
+  const email = document.getElementById('email').value.trim();
+  const company = document.getElementById('company').value.trim();
+  const message = document.getElementById('message').value.trim();
+
+  if(!fname || !email || !message){
+    alert('Please fill in your name, email, and message.');
+    return;
+  }
+
+  const subject = encodeURIComponent('Website enquiry from ' + fname + ' ' + lname);
+  const body = encodeURIComponent(
+    'Name: ' + fname + ' ' + lname + '\n' +
+    'Email: ' + email + '\n' +
+    (company ? 'Company: ' + company + '\n' : '') +
+    '\nMessage:\n' + message
+  );
+
+  window.location.href = 'mailto:miguel.medina@amm-se.be?subject=' + subject + '&body=' + body;
+
+  const btn = e.target.querySelector('.btn-submit');
+  btn.textContent = 'Opening your email client…';
+  btn.style.background = 'var(--amber)';
+}
+</script>
+</body>
+</html>
