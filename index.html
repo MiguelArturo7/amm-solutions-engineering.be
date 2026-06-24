@@ -10,7 +10,7 @@
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 :root{
   --black:#0A0A0A;--white:#F5F5F0;--amber:#D4A017;
-  --grey:#E8E8E2;--rule:#C8C8C0;--mid:#6B6B65;--dark-mid:#3A3A36;
+  --grey:#E8E8E2;--rule:#A8A8A0;--mid:#3D3D38;--dark-mid:#3A3A36;
 }
 html{scroll-behavior:smooth;font-size:16px}
 body{background:var(--white);color:var(--black);font-family:'Inter',sans-serif;overflow-x:hidden}
@@ -22,7 +22,7 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;display:grid;grid-template-c
 .nav-links{display:flex;gap:28px;list-style:none}
 .nav-links a{font-family:'Space Mono',monospace;font-size:0.65rem;letter-spacing:0.1em;text-transform:uppercase;color:var(--mid);text-decoration:none;transition:color 0.15s}
 .nav-links a:hover{color:var(--black)}
-.nav-center{font-family:'Space Mono',monospace;font-size:0.6rem;color:var(--rule);text-align:center;letter-spacing:0.06em}
+.nav-center{font-family:'Space Mono',monospace;font-size:0.6rem;color:var(--mid);text-align:center;letter-spacing:0.06em}
 .nav-right{display:flex;justify-content:flex-end}
 .nav-lang-wrap{position:relative}
 .lang-current{font-family:'Space Mono',monospace;font-size:0.65rem;letter-spacing:0.12em;color:var(--amber);background:none;border:none;cursor:pointer;display:flex;align-items:center;gap:5px;padding:4px 0}
@@ -641,37 +641,55 @@ var SENSORS = [
     code: 'LUX',
     name: 'Light / Occupancy',
     alertTitle: 'UNEXPECTED LIGHT EVENT',
-    alertBody: 'Luminance spike 0 \u2192 840 lux at 03:17. Unauthorised access or equipment failure suspected.',
+    alertBody: 'Luminance 840 lux detected at 03:17 in restricted area. Unauthorised access suspected.',
     color: '#F0D060',
     draw: function(ctx, W, H, phase, anomalyProgress) {
-      var baseline = H * 0.72;
-      // flat dark, then spike
-      var spikeX = W * 0.62;
+      var darkLevel = H * 0.78;
+      var lightLevel = H * 0.22;
+      var switchX = W * 0.55;
+      // threshold line
+      var threshY = H * 0.55;
+      ctx.strokeStyle = 'rgba(240,208,96,0.2)';
+      ctx.lineWidth = 1; ctx.setLineDash([6,4]);
+      ctx.beginPath(); ctx.moveTo(0, threshY); ctx.lineTo(W, threshY); ctx.stroke();
+      ctx.setLineDash([]);
+      ctx.fillStyle = 'rgba(240,208,96,0.18)';
+      ctx.font = '9px Space Mono, monospace';
+      ctx.fillText('ALERT THRESHOLD', 8, threshY - 6);
+      // draw signal: flat dark → instant step up → stays high with noise
       ctx.beginPath();
       ctx.strokeStyle = this.color;
       ctx.lineWidth = 1.5;
       ctx.shadowColor = this.color; ctx.shadowBlur = 3;
       for (var i = 0; i <= W; i++) {
-        var noise = (Math.random()-0.5)*2;
+        var noise = (Math.random()-0.5)*3;
         var y;
-        if (i < spikeX || anomalyProgress < 0.05) {
-          y = baseline + noise;
+        if (anomalyProgress < 0.08 || i < switchX) {
+          // flat dark baseline — tiny noise like sensor at rest
+          y = darkLevel + noise * 0.4;
         } else {
-          var spikeProgress = Math.min((i - spikeX) / (W * 0.08), 1);
-          var spikeHeight = anomalyProgress * H * 0.52;
-          // sharp up, gradual decay
-          var decay = Math.max(0, 1 - (i - spikeX - W*0.08) / (W * 0.22));
-          var spike = spikeProgress < 1 ? spikeProgress * spikeHeight : spikeHeight * Math.max(decay, 0);
-          y = baseline - spike + noise;
+          // instant step: within 3px go from dark to light level
+          if (i < switchX + 3) {
+            y = darkLevel + noise * 0.4;
+          } else {
+            // sustained high level with realistic lux noise
+            y = lightLevel + noise * 1.8;
+          }
         }
         if (i === 0) ctx.moveTo(i, y); else ctx.lineTo(i, y);
       }
       ctx.stroke(); ctx.shadowBlur = 0;
-      // time label
-      ctx.fillStyle = 'rgba(240,208,96,0.3)';
-      ctx.font = '9px Space Mono, monospace';
-      if(anomalyProgress > 0.05) ctx.fillText('03:17:42', spikeX - 2, H * 0.82);
-      var lux = Math.round(anomalyProgress * 840);
+      // vertical step marker
+      if (anomalyProgress > 0.08) {
+        ctx.strokeStyle = 'rgba(240,208,96,0.35)';
+        ctx.lineWidth = 1; ctx.setLineDash([3,3]);
+        ctx.beginPath(); ctx.moveTo(switchX+3, darkLevel); ctx.lineTo(switchX+3, lightLevel); ctx.stroke();
+        ctx.setLineDash([]);
+        ctx.fillStyle = 'rgba(240,208,96,0.3)';
+        ctx.font = '9px Space Mono, monospace';
+        ctx.fillText('03:17:42', switchX + 6, H * 0.88);
+      }
+      var lux = anomalyProgress > 0.08 ? 840 : Math.round(anomalyProgress * 12);
       ctx.fillStyle = this.color;
       ctx.font = 'bold 11px Space Mono, monospace';
       ctx.fillText(lux + ' lux', W - 58, 24);
@@ -778,7 +796,7 @@ var W, H;
 var currentSensor = 0;
 var sensorPhase = 0;
 var sensorT = 0;           // time within current sensor cycle
-var CYCLE = 8.0;           // seconds per sensor
+var CYCLE = 13.0;           // seconds per sensor
 var ANOMALY_START = 3.5;   // when anomaly begins
 var RAF;
 var lastTime = null;
