@@ -1,0 +1,1214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>AMM Solution Engineering</title>
+<link rel="icon" type="image/png" href="Logo.png"/>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;700&family=Space+Mono:wght@400;700&family=Inter:wght@300;400;500&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --black:#0A0A0A;--white:#F5F5F0;--amber:#D4A017;
+  --grey:#E8E8E2;--rule:#A8A8A0;--mid:#3D3D38;--dark-mid:#3A3A36;
+}
+html{scroll-behavior:smooth;font-size:16px}
+body{background:var(--white);color:var(--black);font-family:'Inter',sans-serif;overflow-x:hidden}
+
+/* NAV */
+nav{position:fixed;top:0;left:0;right:0;z-index:100;display:grid;grid-template-columns:1fr auto 1fr;align-items:center;padding:0 40px;height:52px;background:var(--white);border-bottom:1px solid var(--rule)}
+.nav-left{display:flex;align-items:center;gap:32px}
+.nav-logo{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:0.85rem;letter-spacing:0.08em;text-decoration:none;color:var(--black)}
+.nav-links{display:flex;gap:28px;list-style:none}
+.nav-links a{font-family:'Space Mono',monospace;font-size:0.65rem;letter-spacing:0.1em;text-transform:uppercase;color:var(--mid);text-decoration:none;transition:color 0.15s}
+.nav-links a:hover{color:var(--black)}
+.nav-center{font-family:'Space Mono',monospace;font-size:0.6rem;color:var(--mid);text-align:center;letter-spacing:0.06em}
+.nav-right{display:flex;justify-content:flex-end}
+.nav-lang-static{display:flex;align-items:center;gap:4px}
+.lang-static-btn{font-family:'Space Mono',monospace;font-size:0.65rem;letter-spacing:0.12em;color:var(--mid);background:none;border:none;cursor:pointer;padding:4px 6px;transition:color 0.15s}
+.lang-static-btn:hover{color:var(--black)}
+.lang-static-btn.active{color:var(--amber);font-weight:700}
+.lang-static-sep{color:var(--rule);font-size:0.65rem}
+
+/* HERO */
+#hero{min-height:100vh;padding-top:52px;display:flex;flex-direction:column;border-bottom:1px solid var(--rule)}
+.hero-top{display:grid;grid-template-columns:1fr 1fr;border-bottom:1px solid rgba(255,255,255,0.07)}
+.hero-left{padding:56px 48px 48px;border-right:1px solid var(--rule);display:flex;flex-direction:column;justify-content:center;gap:24px}
+.hero-section-id{font-family:'Space Mono',monospace;font-size:0.65rem;color:var(--mid);letter-spacing:0.12em;margin-bottom:32px}
+.hero-top-right{padding:56px 48px 48px;display:flex;flex-direction:column;justify-content:center}
+.hero-h1{font-family:'Space Grotesk',sans-serif;font-size:clamp(2.8rem,5vw,5rem);font-weight:700;line-height:1.0;letter-spacing:-0.03em;color:var(--black)}
+.hero-h1 em{font-style:normal;color:var(--amber)}
+.hero-bottom{padding-top:0}
+.hero-tagline{font-family:'Inter',sans-serif;font-weight:300;font-size:1rem;line-height:1.7;color:var(--mid);margin-bottom:32px;border-left:2px solid var(--amber);padding-left:20px}
+.hero-cta-row{display:flex;gap:12px;align-items:center}
+.btn-primary{font-family:'Space Mono',monospace;font-size:0.65rem;letter-spacing:0.1em;text-transform:uppercase;background:var(--black);color:var(--white);border:none;padding:12px 24px;cursor:pointer;text-decoration:none;transition:background 0.2s;display:inline-block}
+.btn-primary:hover{background:var(--amber)}
+.btn-secondary{font-family:'Space Mono',monospace;font-size:0.65rem;letter-spacing:0.1em;text-transform:uppercase;background:none;color:var(--mid);border:1px solid var(--rule);padding:12px 24px;cursor:pointer;text-decoration:none;transition:all 0.2s;display:inline-block}
+.btn-secondary:hover{border-color:var(--black);color:var(--black)}
+
+/* SENSOR DASHBOARD */
+.hero-right{display:flex;flex-direction:column;background:var(--black);position:relative;overflow:hidden;flex:1;min-height:0;isolation:isolate}
+.sensor-dot{width:6px;height:6px;border-radius:50%;background:var(--amber);animation:pulse 1.8s ease-in-out infinite;display:inline-block}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:0.3}}
+.db-header{padding:14px 20px;border-bottom:1px solid rgba(255,255,255,0.07);display:flex;justify-content:space-between;align-items:center;flex-shrink:0;position:relative;z-index:1}
+.db-title{font-family:'Space Mono',monospace;font-size:0.65rem;letter-spacing:0.14em;color:rgba(255,255,255,0.25)}
+.db-live{display:flex;align-items:center;gap:8px;font-family:'Space Mono',monospace;font-size:0.6rem;letter-spacing:0.1em;color:rgba(255,255,255,0.25)}
+.db-grid{flex:1;display:grid;grid-template-columns:repeat(4,1fr);grid-template-rows:1fr 1fr;gap:1px;background:rgba(255,255,255,0.05);overflow:hidden;min-height:0}
+.db-card{background:#0A0A0A;display:flex;flex-direction:column;position:relative;overflow:hidden;transition:background 0.4s}
+.db-card.alerting{background:#120808}
+.db-card-head{padding:8px 10px 4px;display:flex;justify-content:space-between;align-items:center;flex-shrink:0}
+.db-card-code{font-family:'Space Mono',monospace;font-size:0.6rem;font-weight:700;letter-spacing:0.1em}
+.db-card-val{font-family:'Space Mono',monospace;font-size:0.65rem;font-weight:700;letter-spacing:0.06em}
+.db-card-canvas{flex:1;width:100%;display:block;min-height:0}
+.db-card-status{padding:3px 10px 6px;font-family:'Space Mono',monospace;font-size:0.52rem;letter-spacing:0.06em;color:rgba(255,255,255,0.18);display:flex;justify-content:space-between;flex-shrink:0}
+.db-card-overlay{position:absolute;bottom:0;left:0;right:0;padding:7px 10px;background:rgba(232,52,26,0.92);border-top:1px solid rgba(232,52,26,0.5);display:flex;flex-direction:column;gap:2px;opacity:0;transform:translateY(4px);transition:opacity 0.3s,transform 0.3s;pointer-events:none}
+.db-card-overlay.visible{opacity:1;transform:translateY(0)}
+.db-card-overlay.recovering{background:rgba(30,80,40,0.92);border-color:rgba(74,222,128,0.4)}
+.db-overlay-title{font-family:'Space Mono',monospace;font-size:0.58rem;font-weight:700;color:#fff;letter-spacing:0.08em}
+.db-overlay-body{font-family:'Space Mono',monospace;font-size:0.5rem;color:rgba(255,255,255,0.75);letter-spacing:0.04em;line-height:1.4}
+.db-card-status.err{color:#E8341A}
+.db-card-status.warn{color:#F59E0B}
+.db-log-warn .db-log-msg{color:#F59E0B}
+
+
+
+
+
+
+
+
+
+
+.db-critical{position:absolute;top:0;left:0;right:0;z-index:20;height:44px;display:flex;align-items:center;gap:10px;padding:0 20px;background:rgba(18,4,4,0.96);border-bottom:1px solid rgba(232,52,26,0.5);opacity:0;pointer-events:none;transition:opacity 0.4s}
+.db-critical.visible{opacity:1;animation:critPulse 1.4s ease-in-out infinite}
+@keyframes critPulse{0%,100%{background:rgba(232,52,26,0.1)}50%{background:rgba(232,52,26,0.25)}}
+.db-critical-icon{font-size:1rem;color:#E8341A}
+.db-critical-text{font-family:'Space Mono',monospace;font-size:0.65rem;letter-spacing:0.1em;color:#E8341A;font-weight:700}
+.db-clock{font-family:'Space Mono',monospace;font-size:0.6rem;letter-spacing:0.08em;color:rgba(255,255,255,0.45)}
+.db-log-card{display:flex;flex-direction:column;overflow:hidden}
+.db-log-head{border-bottom:1px solid rgba(255,255,255,0.06)}
+.db-log-sub{font-family:'Space Mono',monospace;font-size:0.52rem;letter-spacing:0.08em;color:rgba(255,255,255,0.18)}
+.db-log-entries{flex:1;overflow-y:auto;padding:4px 0;display:flex;flex-direction:column;gap:0}
+.db-log-entries::-webkit-scrollbar{width:2px}
+.db-log-entries::-webkit-scrollbar-thumb{background:rgba(255,255,255,0.1)}
+.db-log-entry{padding:5px 10px;border-bottom:1px solid rgba(255,255,255,0.04);display:grid;grid-template-columns:auto auto 1fr;gap:6px;align-items:center;animation:logIn 0.3s ease}
+@keyframes logIn{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:translateY(0)}}
+.db-log-alert .db-log-msg{color:#E8341A}
+.db-log-ok .db-log-msg{color:#4ADE80}
+.db-log-ts{font-family:'Space Mono',monospace;font-size:0.48rem;color:rgba(255,255,255,0.22);letter-spacing:0.03em;white-space:nowrap}
+.db-log-code{font-family:'Space Mono',monospace;font-size:0.55rem;font-weight:700;letter-spacing:0.08em;white-space:nowrap}
+.db-log-msg{font-family:'Space Mono',monospace;font-size:0.52rem;letter-spacing:0.05em;color:rgba(255,255,255,0.45);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+
+/* TUTORIAL */
+.tutorial-overlay{position:absolute;inset:0;z-index:10;background:rgba(10,10,10,0.82);backdrop-filter:blur(4px);display:flex;align-items:center;justify-content:center;opacity:1;transition:opacity 0.5s;pointer-events:none}
+.tutorial-overlay.hidden{opacity:0}
+.tutorial-content{display:flex;flex-direction:column;gap:20px;padding:28px}
+.tutorial-row{display:flex;align-items:center;gap:18px}
+.tut-icon{font-family:"Space Mono",monospace;font-size:1.1rem;color:var(--amber);width:28px;text-align:center;flex-shrink:0}
+.tut-text{font-family:"Space Grotesk",sans-serif;font-size:0.95rem;font-weight:400;color:rgba(255,255,255,0.85);line-height:1.4}
+
+/* SECTIONS */
+.section{border-bottom:1px solid var(--rule)}
+.section-inner{display:grid;grid-template-columns:200px 1fr;min-height:0}
+.section-label{padding:56px 32px 56px 40px;border-right:1px solid var(--rule)}
+.section-num{font-family:'Space Mono',monospace;font-size:0.6rem;letter-spacing:0.14em;color:var(--mid);display:block;margin-bottom:8px}
+.section-title{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:0.78rem;letter-spacing:0.06em;text-transform:uppercase;color:var(--black)}
+.section-body{padding:56px}
+
+/* SIGNAL CHAIN */
+#signal .section-body{display:flex;flex-direction:column;gap:0}
+.signal-intro{font-family:'Space Grotesk',sans-serif;font-weight:300;font-size:clamp(1.4rem,2.5vw,2rem);line-height:1.35;color:var(--black);max-width:680px;margin-bottom:56px;letter-spacing:-0.01em}
+.signal-intro strong{font-weight:700;color:var(--amber)}
+.chain{display:grid;grid-template-columns:repeat(5,1fr);gap:0;border:1px solid var(--rule)}
+.chain-node{padding:28px 24px;border-right:1px solid var(--rule);position:relative}
+.chain-node:last-child{border-right:none;background:rgba(212,160,23,0.06)}
+.chain-node-num{font-family:'Space Mono',monospace;font-size:0.6rem;color:var(--mid);display:block;margin-bottom:12px}
+.chain-node-title{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:0.9rem;color:var(--black);margin-bottom:6px}
+.chain-node:last-child .chain-node-title{color:var(--amber)}
+.chain-node-sub{font-family:'Inter',sans-serif;font-weight:300;font-size:0.78rem;color:var(--mid);line-height:1.5}
+.chain-arrow{position:absolute;right:-10px;top:50%;transform:translateY(-50%);font-size:0.6rem;color:var(--rule);z-index:1;background:var(--white);padding:2px 0}
+.chain-node:last-child .chain-arrow{display:none}
+.signal-sub{margin-top:32px;font-family:'Inter',sans-serif;font-weight:300;font-size:0.88rem;color:var(--mid);line-height:1.75;max-width:560px;border-top:1px solid var(--rule);padding-top:32px}
+
+/* COSTS */
+#cost .section-body{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--rule);padding:0}
+.cost-card{background:var(--white);padding:40px 36px}
+.cost-card-tag{font-family:'Space Mono',monospace;font-size:0.6rem;letter-spacing:0.12em;text-transform:uppercase;color:var(--amber);display:block;margin-bottom:20px}
+.cost-card-title{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:1.2rem;color:var(--black);margin-bottom:12px;line-height:1.2}
+.cost-card-text{font-family:'Inter',sans-serif;font-weight:300;font-size:0.8rem;color:var(--mid);line-height:1.7}
+
+/* PROCESS */
+#process .section-body{display:flex;flex-direction:column;gap:0;padding:0}
+.process-step{display:grid;grid-template-columns:80px 1fr;border-bottom:1px solid var(--rule)}
+.process-step:last-child{border-bottom:none}
+.process-n{font-family:'Space Mono',monospace;font-size:2.5rem;font-weight:700;color:var(--grey);padding:32px 24px;border-right:1px solid var(--rule);display:flex;align-items:flex-start;line-height:1}
+.process-content{padding:32px 40px}
+.process-title{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:1rem;letter-spacing:0.02em;color:var(--black);margin-bottom:8px}
+.process-text{font-family:'Inter',sans-serif;font-weight:300;font-size:0.85rem;color:var(--mid);line-height:1.75}
+
+/* MONITOR */
+#monitor .section-body{display:flex;flex-direction:column;gap:0;padding-top:0;padding-bottom:0;padding-right:0}
+.monitor-intro{padding:40px 56px 36px 0;font-family:'Inter',sans-serif;font-weight:300;font-size:0.88rem;color:var(--mid);line-height:1.75;max-width:560px;border-bottom:1px solid var(--rule)}
+.monitor-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:0;background:transparent}
+.monitor-item{background:var(--white);padding:28px 20px;border:none}
+.monitor-item-sym{font-family:'Space Mono',monospace;font-size:0.7rem;color:var(--amber);display:block;margin-bottom:10px;letter-spacing:0.1em}
+.monitor-item h4{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:0.9rem;color:var(--black);margin-bottom:6px}
+.monitor-item p{font-family:'Inter',sans-serif;font-weight:300;font-size:0.78rem;color:var(--mid);line-height:1.65;margin-bottom:10px}
+.monitor-item-warn{font-family:'Space Mono',monospace;font-size:0.6rem;color:var(--mid);letter-spacing:0.06em;border-top:1px solid var(--rule);padding-top:10px;display:block}
+
+/* SECTORS */
+#sectors .section-body{padding:0}
+.sector-grid{display:grid;grid-template-columns:repeat(5,1fr);background:var(--rule);gap:1px}
+.sector-item{background:var(--white);padding:20px 18px;font-family:'Space Mono',monospace;font-size:0.62rem;letter-spacing:0.08em;color:var(--mid);transition:background 0.15s,color 0.15s;cursor:default}
+.sector-item:hover{background:var(--black);color:var(--amber)}
+
+/* CONTACT */
+#contact{border-bottom:none}
+#contact .section-inner{grid-template-columns:200px 1fr 1fr}
+.contact-info{padding:56px 40px;border-right:1px solid var(--rule)}
+.contact-info h2{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:1.4rem;letter-spacing:-0.02em;color:var(--black);margin-bottom:24px;line-height:1.2}
+.contact-info p{font-family:'Inter',sans-serif;font-weight:300;font-size:0.85rem;color:var(--mid);line-height:1.75;margin-bottom:32px}
+.contact-detail-row{display:flex;flex-direction:column;gap:0;border-top:1px solid var(--rule)}
+.c-detail{font-family:'Inter',sans-serif;font-weight:300;font-size:0.88rem;color:var(--mid);display:flex;gap:12px;align-items:center;padding:11px 0;border-bottom:1px solid var(--rule)}
+.c-detail-key{color:var(--rule);min-width:16px}
+.contact-form{padding:56px 40px}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px}
+.form-field{display:flex;flex-direction:column;gap:6px}
+.form-field.full{grid-column:1/-1}
+.form-field label{font-family:'Space Mono',monospace;font-size:0.6rem;letter-spacing:0.12em;text-transform:uppercase;color:var(--mid)}
+.form-field input,.form-field textarea{font-family:'Inter',sans-serif;font-size:0.88rem;font-weight:300;background:var(--grey);border:1px solid transparent;padding:10px 14px;color:var(--black);outline:none;transition:border-color 0.15s,background 0.15s;resize:none}
+.form-field input:focus,.form-field textarea:focus{border-color:var(--amber);background:var(--white)}
+.form-field input::placeholder,.form-field textarea::placeholder{color:var(--rule)}
+.consent-row{display:flex;gap:10px;align-items:flex-start;margin-bottom:20px}
+.consent-row input{flex-shrink:0;margin-top:3px;accent-color:var(--amber)}
+.consent-row label{font-family:'Inter',sans-serif;font-size:0.78rem;font-weight:300;color:var(--mid);line-height:1.6;cursor:pointer}
+.hp-field{position:absolute;left:-9999px;opacity:0;height:0;overflow:hidden}
+
+/* FOOTER */
+footer{background:var(--black);padding:24px 40px;display:flex;justify-content:space-between;align-items:center;border-top:1px solid #222}
+.footer-logo{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:0.8rem;letter-spacing:0.08em;color:rgba(255,255,255,0.3);text-decoration:none}
+.footer-logo span{color:var(--amber)}
+footer p{font-family:'Space Mono',monospace;font-size:0.6rem;color:rgba(255,255,255,0.2);letter-spacing:0.06em}
+
+/* RESPONSIVE */
+@media(max-width:900px){
+  .hero-top{grid-template-columns:1fr}
+  .hero-left{border-right:none;border-bottom:1px solid var(--rule)}
+  .db-grid{grid-template-columns:1fr 1fr;grid-template-rows:repeat(4,1fr)}
+
+  #hero{grid-template-columns:1fr}
+  .hero-right{min-height:400px}
+  .section-inner{grid-template-columns:1fr}
+  .section-label{border-right:none;border-bottom:1px solid var(--rule);padding:32px 24px}
+  .section-body{padding:32px 24px}
+  .chain{grid-template-columns:1fr;border:none;gap:1px;background:var(--rule)}
+  .chain-node{border-right:none}
+  .chain-arrow{display:none}
+  #cost .section-body{grid-template-columns:1fr}
+  .process-n{font-size:1.8rem;padding:24px 16px}
+  .process-content{padding:24px}
+  .monitor-grid{grid-template-columns:1fr 1fr}
+  .sector-grid{grid-template-columns:repeat(2,1fr)}
+  #contact .section-inner{grid-template-columns:1fr}
+  .contact-info{border-right:none;border-bottom:1px solid var(--rule)}
+  nav{grid-template-columns:1fr auto;padding:0 24px}
+  .nav-center{display:none}
+  .form-grid{grid-template-columns:1fr}
+  footer{flex-direction:column;gap:8px;text-align:center}
+}
+@media(max-width:560px){
+  .nav-links{display:none}
+  h1{font-size:2.2rem}
+  .monitor-grid{grid-template-columns:1fr}
+  .sector-grid{grid-template-columns:repeat(2,1fr)}
+  .hero-cta-row{flex-direction:column;align-items:flex-start}
+}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-left">
+    <a href="#hero" class="nav-logo">AMM SOLUTION ENGINEERING</a>
+    <ul class="nav-links">
+      <li><a href="#signal" data-i18n="nav-how">Signal chain</a></li>
+      <li><a href="#monitor" data-i18n="nav-measure">Monitor</a></li>
+      <li><a href="#contact" data-i18n="nav-contact">Contact</a></li>
+    </ul>
+  </div>
+  <div class="nav-center">BE 1027.565.243</div>
+  <div class="nav-right">
+    <div class="nav-lang-static">
+      <button class="lang-static-btn active" id="lang-btn-en" onclick="setLang('en')">EN</button>
+      <span class="lang-static-sep">/</span>
+      <button class="lang-static-btn" id="lang-btn-fr" onclick="setLang('fr')">FR</button>
+      <span class="lang-static-sep">/</span>
+      <button class="lang-static-btn" id="lang-btn-nl" onclick="setLang('nl')">NL</button>
+    </div>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section id="hero">
+  <!-- TOP ROW: pitch left, tagline + CTA right -->
+  <div class="hero-top">
+    <div class="hero-left">
+      <div class="hero-section-id" data-i18n="hero-id">PREDICTIVE MONITORING</div>
+      <h1 class="hero-h1" data-i18n="hero-h1">I tell you<br>what's coming<br><em>before it costs you.</em></h1>
+    </div>
+    <div class="hero-top-right">
+      <p class="hero-tagline" data-i18n="hero-tagline">Sensor-based monitoring that translates raw measurements into concrete warnings, before downtime, energy loss, or an emergency repair bill.</p>
+      <div class="hero-cta-row">
+        <a href="#contact" class="btn-primary" data-i18n="hero-cta1">Get in touch</a>
+        <a href="#signal" class="btn-secondary" data-i18n="hero-cta2">How it works</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- BOTTOM: full-width sensor dashboard -->
+  <div class="hero-right" id="dashboard">
+    <div class="db-header">
+      <span class="db-title">LIVE ASSET MONITOR</span>
+      <span class="db-clock" id="db-clock">--:--:--</span>
+      <span class="db-live"><span class="sensor-dot"></span>&nbsp;<span data-i18n="signal-monitoring">MONITORING</span></span>
+    </div>
+    <div class="db-critical" id="db-critical"><span class="db-critical-icon">&#9888;</span><span class="db-critical-text">CRITICAL — Multiple sensor failures detected</span></div>
+    <div class="db-grid" id="db-grid">
+      <!-- cards injected by JS -->
+    </div>
+  </div>
+</section>
+
+<!-- §01 SIGNAL CHAIN -->
+<section class="section" id="signal">
+  <div class="section-inner">
+    <div class="section-label">
+      <span class="section-num">&sect;01</span>
+      <span class="section-title" data-i18n="s1-title">What I do</span>
+    </div>
+    <div class="section-body">
+      <p class="signal-intro" data-i18n="s1-intro">I install sensors on your assets, read the data continuously, and <strong>translate measurements into a concrete warning</strong>, before it costs you money.</p>
+      <div class="chain">
+        <div class="chain-node">
+          <span class="chain-node-num">01</span>
+          <div class="chain-node-title" data-i18n="c1-t">Asset</div>
+          <div class="chain-node-sub" data-i18n="c1-s">Motor, pump, compressor, storage unit</div>
+          <span class="chain-arrow">&#8250;</span>
+        </div>
+        <div class="chain-node">
+          <span class="chain-node-num">02</span>
+          <div class="chain-node-title" data-i18n="c2-t">Sensor</div>
+          <div class="chain-node-sub" data-i18n="c2-s">Reads physical state continuously</div>
+          <span class="chain-arrow">&#8250;</span>
+        </div>
+        <div class="chain-node">
+          <span class="chain-node-num">03</span>
+          <div class="chain-node-title" data-i18n="c3-t">Data stream</div>
+          <div class="chain-node-sub" data-i18n="c3-s">Raw values, 24/7</div>
+          <span class="chain-arrow">&#8250;</span>
+        </div>
+        <div class="chain-node">
+          <span class="chain-node-num">04</span>
+          <div class="chain-node-title" data-i18n="c4-t">Interpretation</div>
+          <div class="chain-node-sub" data-i18n="c4-s">Thresholds, drift, anomaly patterns</div>
+          <span class="chain-arrow">&#8250;</span>
+        </div>
+        <div class="chain-node">
+          <span class="chain-node-num">05</span>
+          <div class="chain-node-title" data-i18n="c5-t">Warning</div>
+          <div class="chain-node-sub" data-i18n="c5-s">Concrete alert before failure occurs</div>
+        </div>
+      </div>
+      <p class="signal-sub" data-i18n="s1-sub">Sensors alone do nothing. Data alone does nothing. The value is in the interpretation, understanding what the numbers mean for your specific equipment and turning that into a signal you can act on.</p>
+    </div>
+  </div>
+</section>
+
+<!-- §02 WHAT IT PREVENTS -->
+<section class="section" id="cost">
+  <div class="section-inner">
+    <div class="section-label">
+      <span class="section-num">&sect;02</span>
+      <span class="section-title" data-i18n="s2-title">What it prevents</span>
+    </div>
+    <div class="section-body">
+      <div class="cost-card">
+        <span class="cost-card-tag" data-i18n="cc1-tag">01 &mdash; DOWNTIME</span>
+        <div class="cost-card-title" data-i18n="cc1-t">Unplanned production stops</div>
+        <p class="cost-card-text" data-i18n="cc1-p">A vibration anomaly caught three weeks early is a scheduled maintenance window. Caught after the fact, it is a production halt at the worst possible moment.</p>
+      </div>
+      <div class="cost-card">
+        <span class="cost-card-tag" data-i18n="cc2-tag">02 &mdash; ENERGY</span>
+        <div class="cost-card-title" data-i18n="cc2-t">Invisible energy loss</div>
+        <p class="cost-card-text" data-i18n="cc2-p">Slow thermal drift rarely triggers an alarm, until the invoice arrives. Continuous monitoring makes it visible before it compounds.</p>
+      </div>
+      <div class="cost-card">
+        <span class="cost-card-tag" data-i18n="cc3-tag">03 &mdash; COMPLIANCE</span>
+        <div class="cost-card-title" data-i18n="cc3-t">Regulatory exposure</div>
+        <p class="cost-card-text" data-i18n="cc3-p">An out-of-range reading in a controlled environment can carry consequences. Knowing in real time gives you a documented response, not a gap in your records.</p>
+      </div>
+      <div class="cost-card">
+        <span class="cost-card-tag" data-i18n="cc4-tag">04 &mdash; REPAIR</span>
+        <div class="cost-card-title" data-i18n="cc4-t">Emergency call-out costs</div>
+        <p class="cost-card-text" data-i18n="cc4-p">The most expensive repair is always the one that could not wait. Predictive signals let you plan on your schedule, not on failure's schedule.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- §03 PROCESS -->
+<section class="section" id="process">
+  <div class="section-inner">
+    <div class="section-label">
+      <span class="section-num">&sect;03</span>
+      <span class="section-title" data-i18n="s3-title">Process</span>
+    </div>
+    <div class="section-body">
+      <div class="process-step">
+        <div class="process-n">1</div>
+        <div class="process-content">
+          <div class="process-title" data-i18n="p1-t">Understand your installation</div>
+          <p class="process-text" data-i18n="p1-p">I visit your site, identify critical assets, and determine what actually needs to be monitored and why. No standard packages, only what makes sense for your specific situation.</p>
+        </div>
+      </div>
+      <div class="process-step">
+        <div class="process-n">2</div>
+        <div class="process-content">
+          <div class="process-title" data-i18n="p2-t">Install &amp; integrate</div>
+          <p class="process-text" data-i18n="p2-p">I wire and configure the sensors myself and connect them to a microcontroller that reads them continuously. Hardware to firmware, done in one intervention.</p>
+        </div>
+      </div>
+      <div class="process-step">
+        <div class="process-n">3</div>
+        <div class="process-content">
+          <div class="process-title" data-i18n="p3-t">Define normal &amp; set alert logic</div>
+          <p class="process-text" data-i18n="p3-p">I establish baseline behaviour for your equipment and configure thresholds and triggers that produce real, actionable warnings, not just numbers on a screen.</p>
+        </div>
+      </div>
+      <div class="process-step">
+        <div class="process-n">4</div>
+        <div class="process-content">
+          <div class="process-title" data-i18n="p4-t">Live dashboard + ongoing support</div>
+          <p class="process-text" data-i18n="p4-p">You get a live view of your key metrics. When something drifts outside normal bounds, you are alerted before it becomes a problem. I remain available to interpret, adjust, and expand.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- §04 WHAT I MONITOR -->
+<section class="section" id="monitor">
+  <div class="section-inner">
+    <div class="section-label">
+      <span class="section-num">&sect;04</span>
+      <span class="section-title" data-i18n="s4-title">What I monitor</span>
+    </div>
+    <div class="section-body">
+      <p class="monitor-intro" data-i18n="s4-intro">Examples of sensor types I work with, the list is not fixed. Every installation starts from your specific assets and what actually needs to be watched.</p>
+      <div class="monitor-grid">
+        <div class="monitor-item">
+          <span class="monitor-item-sym">TMP</span>
+          <h4 data-i18n="m1-h">Temperature</h4>
+          <p data-i18n="m1-p">Catches thermal drift on motors, switchgear, and storage before it becomes damage.</p>
+          <span class="monitor-item-warn" data-i18n="m1-s">&rarr; Overheating / thermal runaway / spoilage</span>
+        </div>
+        <div class="monitor-item">
+          <span class="monitor-item-sym">HUM</span>
+          <h4 data-i18n="m2-h">Humidity</h4>
+          <p data-i18n="m2-p">Detects moisture before it corrodes contacts, degrades insulation, or breaches compliance.</p>
+          <span class="monitor-item-warn" data-i18n="m2-s">&rarr; Corrosion / insulation failure / non-compliance</span>
+        </div>
+        <div class="monitor-item">
+          <span class="monitor-item-sym">VIB</span>
+          <h4 data-i18n="m3-h">Vibration</h4>
+          <p data-i18n="m3-p">Monitors amplitude and pattern in rotating machinery, not just whether something shakes.</p>
+          <span class="monitor-item-warn" data-i18n="m3-s">&rarr; Bearing failure / imbalance / loosening</span>
+        </div>
+        <div class="monitor-item">
+          <span class="monitor-item-sym">ACC</span>
+          <h4 data-i18n="m4-h">Tilt &amp; acceleration</h4>
+          <p data-i18n="m4-p">6-axis IMU detects structural shift, impact events, or orientation change before visual inspection.</p>
+          <span class="monitor-item-warn" data-i18n="m4-s">&rarr; Structural drift / g-force event / mounting failure</span>
+        </div>
+        <div class="monitor-item">
+          <span class="monitor-item-sym">LUX</span>
+          <h4 data-i18n="m5-h">Light &amp; occupancy</h4>
+          <p data-i18n="m5-p">Flags energy waste, unexpected access, or environmental changes in sensitive zones.</p>
+          <span class="monitor-item-warn" data-i18n="m5-s">&rarr; Energy waste / unauthorised access</span>
+        </div>
+        <div class="monitor-item">
+          <span class="monitor-item-sym">DST-S</span>
+          <h4 data-i18n="m6-h">Short distance</h4>
+          <p data-i18n="m6-p">Object presence, part positioning, close-range level detection. Contactless, no wear.</p>
+          <span class="monitor-item-warn" data-i18n="m6-s">&rarr; Misalignment / presence / fill level</span>
+        </div>
+        <div class="monitor-item">
+          <span class="monitor-item-sym">DST-L</span>
+          <h4 data-i18n="m7-h">Long distance</h4>
+          <p data-i18n="m7-p">Tank levels, silo fill height, gate or barrier status over longer ranges. Continuous, non-contact.</p>
+          <span class="monitor-item-warn" data-i18n="m7-s">&rarr; Overflow / empty tank / intrusion</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- §05 SECTORS -->
+<section class="section" id="sectors">
+  <div class="section-inner">
+    <div class="section-label">
+      <span class="section-num">&sect;05</span>
+      <span class="section-title" data-i18n="s5-title">Sectors</span>
+    </div>
+    <div class="section-body" style="padding:0">
+      <div class="sector-grid">
+        <div class="sector-item" data-i18n="sec1">Manufacturing &amp; Production</div>
+        <div class="sector-item" data-i18n="sec2">Food &amp; Cold Chain</div>
+        <div class="sector-item" data-i18n="sec3">HVAC &amp; Building Systems</div>
+        <div class="sector-item" data-i18n="sec4">Water &amp; Waste Treatment</div>
+        <div class="sector-item" data-i18n="sec5">Agricultural Technology</div>
+        <div class="sector-item" data-i18n="sec6">Airport &amp; Aviation</div>
+        <div class="sector-item" data-i18n="sec7">Research &amp; Laboratories</div>
+        <div class="sector-item" data-i18n="sec8">Logistics &amp; Warehousing</div>
+        <div class="sector-item" data-i18n="sec9">Startups &amp; Prototyping</div>
+        <div class="sector-item" data-i18n="sec10">Small Industrial Facilities</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- §06 CONTACT -->
+<section class="section" id="contact">
+  <div class="section-inner">
+    <div class="section-label">
+      <span class="section-num">&sect;06</span>
+      <span class="section-title" data-i18n="s6-title">Contact</span>
+    </div>
+    <div class="contact-info">
+      <h2 data-i18n="c-h2">Let's talk about your installation.</h2>
+      <p data-i18n="c-p">Tell me what you're running, what worries you, or what has already gone wrong once too often. I'll tell you honestly whether sensor monitoring can help, and what it would take.</p>
+      <div class="contact-detail-row">
+        <div class="c-detail"><span class="c-detail-key">@</span>miguel.medina@amm-se.be</div>
+        <div class="c-detail"><span class="c-detail-key">T</span>+32 473 21 17 83</div>
+        <div class="c-detail"><span class="c-detail-key">#</span>BE 1027.565.243</div>
+        <div class="c-detail"><span class="c-detail-key">&bull;</span>Belgium</div>
+      </div>
+    </div>
+    <div class="contact-form">
+      <form onsubmit="handleSubmit(event)">
+        <div class="hp-field"><input type="text" id="website" name="website" tabindex="-1" autocomplete="off"/></div>
+        <div class="form-grid">
+          <div class="form-field"><label data-i18n="f-fname">First name</label><input type="text" id="fname" placeholder="John" required/></div>
+          <div class="form-field"><label data-i18n="f-lname">Last name</label><input type="text" id="lname" placeholder="Smith" required/></div>
+          <div class="form-field"><label data-i18n="f-email">Email</label><input type="email" id="email" placeholder="john@company.com" required/></div>
+          <div class="form-field"><label data-i18n="f-company">Company <span style="font-weight:300;opacity:0.5;text-transform:none;letter-spacing:0">(optional)</span></label><input type="text" id="company" data-i18n-ph="f-company-ph" placeholder="Your company"/></div>
+          <div class="form-field full"><label data-i18n="f-msg">Message</label><textarea id="message" rows="5" data-i18n-ph="f-msg-ph" placeholder="Tell me what you are running and what concerns you..." required></textarea></div>
+        </div>
+        <div class="consent-row">
+          <input type="checkbox" id="verify" required/>
+          <label for="verify" data-i18n="f-consent">I confirm I am a real person and agree to be contacted regarding this enquiry.</label>
+        </div>
+        <button type="submit" class="btn-primary" data-i18n="f-submit">Send message</button>
+      </form>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <a href="#hero" class="footer-logo">AMM <span>SOLUTION</span> ENGINEERING</a>
+  <p>&copy; 2025 &mdash; BELGIUM</p>
+</footer>
+
+<script>
+// ── DASHBOARD CONFIG ──
+
+var DB_SENSORS = [
+  { code:'TMP',    name:'Temperature',    color:'#E8734A', unit:'°C',
+    min:-20, max:80, stable:[10,30], warn:[-10,50], err:[0,70],  // [low, high] bounds
+    alertTitle:'THERMAL ANOMALY', alertTitle_fr:'ANOMALIE THERMIQUE', alertTitle_nl:'THERMISCHE ANOMALIE',
+    alertTitle_w:'TEMPERATURE WARNING', alertTitle_w_fr:'AVERTISSEMENT TEMP.', alertTitle_w_nl:'TEMP. WAARSCHUWING',
+  },
+  { code:'HUM',    name:'Humidity',       color:'#4A9EE8', unit:'%RH',
+    min:0, max:100, stable:[0,30], warn:[null,50], err:[null,60],
+    alertTitle:'HUMIDITY CRITICAL', alertTitle_fr:'HUMIDITÉ CRITIQUE', alertTitle_nl:'VOCHTIGHEID KRITIEK',
+    alertTitle_w:'HUMIDITY WARNING', alertTitle_w_fr:'AVERTISSEMENT HUM.', alertTitle_w_nl:'VOCHTIGHEID WAARSCHUWING',
+  },
+  { code:'VIB',    name:'Vibration',      color:'#D4A017', unit:'g',
+    min:0, max:10, stable:[0,0.5], warn:[null,2.0], err:[null,5.0],
+    alertTitle:'VIBRATION CRITICAL', alertTitle_fr:'VIBRATION CRITIQUE', alertTitle_nl:'TRILLING KRITIEK',
+    alertTitle_w:'VIBRATION WARNING', alertTitle_w_fr:'AVERTISSEMENT VIB.', alertTitle_w_nl:'TRILLING WAARSCHUWING',
+  },
+  { code:'TILT',   name:'Tilt',           color:'#A855F7', unit:'°',
+    min:-10, max:10, stable:[-2,2], warn:[-5,5], err:[-2,2], // err used differently: |val|>2 warn, |val|>5 err
+    alertTitle:'TILT CRITICAL', alertTitle_fr:'INCLINAISON CRITIQUE', alertTitle_nl:'KANTELING KRITIEK',
+    alertTitle_w:'TILT WARNING', alertTitle_w_fr:'AVERTISSEMENT INCLIN.', alertTitle_w_nl:'KANTELING WAARSCHUWING',
+  },
+  { code:'LUX',    name:'Light',          color:'#F0D060', unit:'lux',
+    min:0, max:1200, stable:[0,50], warn:[null,200], err:[null,600],
+    alertTitle:'LIGHT CRITICAL', alertTitle_fr:'LUMIÈRE CRITIQUE', alertTitle_nl:'LICHT KRITIEK',
+    alertTitle_w:'LIGHT WARNING', alertTitle_w_fr:'AVERTISSEMENT LUX', alertTitle_w_nl:'LICHT WAARSCHUWING',
+  },
+  { code:'DST-S',  name:'Short distance', color:'#34D399', unit:'mm',
+    min:0, max:50, stable:[10,15], warn:[null,20], err:[null,30],
+    alertTitle:'DISTANCE CRITICAL', alertTitle_fr:'DISTANCE CRITIQUE', alertTitle_nl:'AFSTAND KRITIEK',
+    alertTitle_w:'DISTANCE WARNING', alertTitle_w_fr:'AVERTISSEMENT DIST.', alertTitle_w_nl:'AFSTAND WAARSCHUWING',
+  },
+  { code:'DST-L',  name:'Long distance',  color:'#38BDF8', unit:'cm',
+    min:0, max:200, stable:[80,150], warn:[50,null], err:[10,null],  // distance to surface: small = almost full
+    alertTitle:'TANK CRITICAL', alertTitle_fr:'TANK CRITIQUE', alertTitle_nl:'TANK KRITIEK',
+    alertTitle_w:'TANK WARNING', alertTitle_w_fr:'AVERTISSEMENT TANK', alertTitle_w_nl:'TANK WAARSCHUWING',
+  }
+];
+
+// ── SENSOR STATE ──
+var sensorRealVal = [18, 20, 0.1, 0, 5, 12, 120]; // realistic starting values
+var sensorTarget  = [18, 20, 0.1, 0, 5, 12, 120]; // target they drift towards
+var sensorStatus  = ['ok','ok','ok','ok','ok','ok','ok']; // ok / warn / error
+var sensorAlerting = [false,false,false,false,false,false,false];
+
+// pixel buffers
+var pixelBufs  = null;
+var writeHeads = null;
+var pixelFull  = null;
+
+// ── STATUS EVALUATION ──
+function evalStatus(s, val) {
+  if (s.code === 'TILT') {
+    var abs = Math.abs(val);
+    if (abs >= 5) return 'error';
+    if (abs >= 2) return 'warn';
+    return 'ok';
+  }
+  // check error bounds
+  if (s.err[0] !== null && val < s.err[0]) return 'error';
+  if (s.err[1] !== null && val > s.err[1]) return 'error';
+  // check warn bounds (only if not error)
+  if (s.warn[0] !== null && val < s.warn[0]) return 'warn';
+  if (s.warn[1] !== null && val > s.warn[1]) return 'warn';
+  return 'ok';
+}
+
+// ── SCENARIOS ──
+// Each event: [sensorIdx, targetValue, holdMs, recoveryTarget]
+var SCENARIO_QUEUE = [];
+var scenarioTimer = null;
+
+// Scenarios: [sensorIdx, targetValue, holdMs, recoveryTarget]
+// Designed to be calm — mostly single sensor, occasionally 2, rarely 3
+var SCENARIOS = [
+  // Single sensor events — most common
+  { events: [[0, 58, 7000, 18]],          label: 'TMP warning' },
+  { events: [[2, 2.8, 6000, 0.1]],        label: 'VIB warning' },
+  { events: [[1, 55, 6000, 20]],          label: 'HUM warning' },
+  { events: [[5, 25, 6000, 12]],          label: 'DST-S warning' },
+  { events: [[3, 3.5, 5000, 0]],          label: 'TILT warning' },
+  { events: [[4, 280, 5000, 5]],          label: 'LUX warning' },
+  { events: [[6, 35, 6000, 120]],         label: 'DST-L warning' },
+
+  // Single sensor going to error
+  { events: [[0, 74, 8000, 18]],          label: 'TMP error' },
+  { events: [[2, 5.5, 7000, 0.1]],        label: 'VIB error' },
+  { events: [[1, 63, 7000, 20]],          label: 'HUM error' },
+  { events: [[5, 33, 7000, 12]],          label: 'DST-S error' },
+  { events: [[6, 8, 8000, 120]],          label: 'DST-L error' },
+
+  // Two sensors — cascade, staggered
+  { events: [[0, 72, 8000, 18], [2, 5.2, 7000, 0.1]],  stagger: 3000, label: 'TMP→VIB cascade' },
+  { events: [[1, 62, 7000, 20], [5, 32, 6000, 12]],    stagger: 2500, label: 'HUM→DST-S cascade' },
+  { events: [[3, 6.0, 7000, 0], [2, 4.5, 6000, 0.1]],  stagger: 2500, label: 'TILT→VIB cascade' },
+  { events: [[6, 8, 8000, 120], [4, 650, 6000, 5]],    stagger: 3000, label: 'DST-L→LUX cascade' },
+  { events: [[0, -13, 7000, 18], [3, 6.0, 6000, 0]],   stagger: 2500, label: 'Cold+TILT' },
+
+  // Three sensors — critical
+  { events: [[0, 73, 9000, 18], [1, 62, 8000, 20], [2, 5.5, 7000, 0.1]], stagger: 3000, label: 'CRITICAL multi-sensor' },
+];
+
+var scenarioIdx = 0;
+var activeTargets = {};
+
+// Non-critical scenarios (single + cascade)
+var NORMAL_SCENARIOS = SCENARIOS.filter(function(sc){ return sc.label.indexOf('CRITICAL') === -1; });
+var CRITICAL_SCENARIO = SCENARIOS.filter(function(sc){ return sc.label.indexOf('CRITICAL') !== -1; })[0];
+var normalIdx = 0;
+
+function fireScenario(sc) {
+  var stagger = sc.stagger || 2000;
+  sc.events.forEach(function(ev, ei) {
+    var sIdx = ev[0], target = ev[1], holdMs = ev[2], recover = ev[3];
+    setTimeout(function(){
+      sensorTarget[sIdx] = target;
+      if (activeTargets[sIdx] && activeTargets[sIdx].timer) clearTimeout(activeTargets[sIdx].timer);
+      activeTargets[sIdx] = {
+        timer: setTimeout(function(){
+          sensorTarget[sIdx] = recover;
+          setTimeout(function(){ delete activeTargets[sIdx]; }, 3000);
+        }, holdMs)
+      };
+    }, ei * stagger);
+  });
+}
+
+function runNormalCycle() {
+  var sc = NORMAL_SCENARIOS[normalIdx % NORMAL_SCENARIOS.length];
+  normalIdx++;
+  fireScenario(sc);
+}
+
+// Every 30s: fire a critical scenario
+function startCriticalTimer() {
+  setInterval(function(){
+    fireScenario(CRITICAL_SCENARIO);
+  }, 30000);
+}
+
+// Between criticals: run a normal scenario every 8-12s
+function startNormalCycle() {
+  runNormalCycle();
+  setTimeout(function loop(){
+    runNormalCycle();
+    setTimeout(loop, 8000 + Math.floor(Math.random() * 4000));
+  }, 8000 + Math.floor(Math.random() * 4000));
+}
+
+// ── CRITICAL WARNING ──
+var criticalVisible = false;
+function checkCritical() {
+  var errCount = 0;
+  sensorStatus.forEach(function(st){ if(st === 'error') errCount++; });
+  var el = document.getElementById('db-critical');
+  if (!el) return;
+  if (errCount >= 3 && !criticalVisible) {
+    criticalVisible = true;
+    el.classList.add('visible');
+    addLog('SYS', '#E8341A', 'error', 'CRITICAL — ' + errCount + ' sensors in error simultaneously');
+  } else if (errCount < 3 && criticalVisible) {
+    criticalVisible = false;
+    el.classList.remove('visible');
+    addLog('SYS', '#4ADE80', 'ok', 'Critical state resolved');
+  }
+}
+
+// ── SIGNAL Y MAPPING ──
+function sensorYValue(s, val, W, H) {
+  var range = s.max - s.min;
+  var norm = (val - s.min) / range; // 0..1 within min..max
+  norm = Math.max(0, Math.min(1, norm));
+  var topPad = H * 0.12, botPad = H * 0.12;
+  var noise = (Math.random() - 0.5) * 1.5;
+
+  if (s.code === 'VIB') {
+    // sine with amplitude proportional to val, flat when near 0
+    var mid = H * 0.5;
+    var amp = (val / s.max) * H * 0.38;
+    if (val < 0.3) return mid + (Math.random()-0.5)*1.5; // flat
+    return mid - Math.sin(phase * (4 + val * 1.5)) * amp;
+  }
+  if (s.code === 'TILT') {
+    // map -10..10 to top..bottom with noise
+    return (H - topPad - botPad) * (1 - norm) + topPad + noise * 0.4;
+  }
+  return (H - topPad - botPad) * (1 - norm) + topPad + noise;
+}
+
+// ── DRAW BUFFER ──
+function drawSensorBuf(c, W, H, buf, s, status, val, i) {
+  var color = status === 'error' ? '#E8341A' : status === 'warn' ? '#F59E0B' : s.color;
+
+  // draw zone bands
+  function yForVal(v) {
+    var norm = (v - s.min) / (s.max - s.min);
+    norm = Math.max(0, Math.min(1, norm));
+    return (H - H*0.12 - H*0.12) * (1 - norm) + H*0.12;
+  }
+
+  // warn zone
+  var warnColor = 'rgba(245,158,11,0.07)';
+  var errColor  = 'rgba(232,52,26,0.08)';
+  if (s.code !== 'TILT' && s.code !== 'VIB') {
+    if (s.warn[1] !== null && s.err[1] !== null) {
+      var wTop = yForVal(s.err[1]), wMid = yForVal(s.warn[1]);
+      c.fillStyle = errColor;  c.fillRect(0, 0,     W, wTop);
+      c.fillStyle = warnColor; c.fillRect(0, wTop,  W, wMid - wTop);
+    } else if (s.warn[0] !== null && s.err[0] !== null) {
+      var wBot = yForVal(s.err[0]), wMid2 = yForVal(s.warn[0]);
+      c.fillStyle = errColor;  c.fillRect(0, wBot,    W, H - wBot);
+      c.fillStyle = warnColor; c.fillRect(0, wMid2,   W, wBot - wMid2);
+    }
+    // stable zone line
+    if (s.stable) {
+      ['rgba(255,255,255,0.07)', 'rgba(255,255,255,0.07)'].forEach(function(col, si) {
+        var sv = s.stable[si];
+        if (sv === null) return;
+        var sy = yForVal(sv);
+        c.strokeStyle = col; c.lineWidth = 1; c.setLineDash([3,3]);
+        c.beginPath(); c.moveTo(0,sy); c.lineTo(W,sy); c.stroke();
+        c.setLineDash([]);
+      });
+    }
+  }
+
+  // threshold labels
+  function drawLabel(yv, label, col) {
+    var y = yForVal(yv);
+    c.strokeStyle = col; c.lineWidth = 1; c.setLineDash([4,3]);
+    c.beginPath(); c.moveTo(0,y); c.lineTo(W,y); c.stroke();
+    c.setLineDash([]);
+    c.fillStyle = col; c.font = '7px Space Mono,monospace';
+    c.fillText(label, 4, y - 3);
+  }
+
+  if (s.code === 'TMP') {
+    drawLabel(50,  'WARN 50°C',  'rgba(245,158,11,0.6)');
+    drawLabel(70,  'ERR  70°C',  'rgba(232,52,26,0.6)');
+    drawLabel(-10, 'WARN -10°C', 'rgba(245,158,11,0.6)');
+  } else if (s.code === 'HUM') {
+    drawLabel(50, 'WARN 50%', 'rgba(245,158,11,0.6)');
+    drawLabel(60, 'ERR  60%', 'rgba(232,52,26,0.6)');
+  } else if (s.code === 'VIB') {
+    var mid = H*0.5;
+    var wAmp = (2.0/s.max)*H*0.38, eAmp = (5.0/s.max)*H*0.38;
+    c.strokeStyle='rgba(245,158,11,0.35)';c.lineWidth=1;c.setLineDash([4,3]);
+    c.beginPath();c.moveTo(0,mid-wAmp);c.lineTo(W,mid-wAmp);c.stroke();
+    c.beginPath();c.moveTo(0,mid+wAmp);c.lineTo(W,mid+wAmp);c.stroke();
+    c.strokeStyle='rgba(232,52,26,0.35)';
+    c.beginPath();c.moveTo(0,mid-eAmp);c.lineTo(W,mid-eAmp);c.stroke();
+    c.beginPath();c.moveTo(0,mid+eAmp);c.lineTo(W,mid+eAmp);c.stroke();
+    c.setLineDash([]);
+    c.fillStyle='rgba(245,158,11,0.5)';c.font='7px Space Mono,monospace';c.fillText('2g',4,mid-wAmp-3);
+    c.fillStyle='rgba(232,52,26,0.5)';c.fillText('5g',4,mid-eAmp-3);
+  } else if (s.code === 'TILT') {
+    drawLabel(2,  'WARN 2°',  'rgba(245,158,11,0.6)');
+    drawLabel(5,  'ERR  5°',  'rgba(232,52,26,0.6)');
+    drawLabel(-2, 'WARN -2°', 'rgba(245,158,11,0.6)');
+    drawLabel(-5, 'ERR  -5°', 'rgba(232,52,26,0.6)');
+    // zero line
+    var zy = yForVal(0);
+    c.strokeStyle='rgba(255,255,255,0.12)';c.lineWidth=1;c.setLineDash([]);
+    c.beginPath();c.moveTo(0,zy);c.lineTo(W,zy);c.stroke();
+    c.fillStyle='rgba(255,255,255,0.2)';c.font='7px Space Mono,monospace';c.fillText('0°',4,zy-3);
+  } else if (s.code === 'LUX') {
+    drawLabel(200, 'WARN 200lx', 'rgba(245,158,11,0.6)');
+    drawLabel(600, 'ERR  600lx', 'rgba(232,52,26,0.6)');
+  } else if (s.code === 'DST-S') {
+    drawLabel(20, 'WARN 20mm', 'rgba(245,158,11,0.6)');
+    drawLabel(30, 'ERR  30mm', 'rgba(232,52,26,0.6)');
+  } else if (s.code === 'DST-L') {
+    drawLabel(50, 'WARN 50cm', 'rgba(245,158,11,0.6)');
+    drawLabel(10, 'ERR  10cm', 'rgba(232,52,26,0.6)');
+  }
+
+  // draw waveform from buffer
+  c.beginPath();
+  c.strokeStyle = color;
+  c.lineWidth = 1.5;
+  if (status === 'error') { c.shadowColor = color; c.shadowBlur = 5; }
+  var started = false;
+  for (var x = 0; x < W; x++) {
+    if (buf[x] === null) continue;
+    if (!started) { c.moveTo(x, buf[x]); started = true; }
+    else c.lineTo(x, buf[x]);
+  }
+  c.stroke();
+  c.shadowBlur = 0;
+
+  // dim unwritten region
+  var head = writeHeads[i] || 0;
+  var full = pixelFull[i] || false;
+  if (!full && head < W) {
+    c.fillStyle = 'rgba(10,10,10,0.55)';
+    c.fillRect(head + 1, 0, W - head - 1, H);
+  }
+
+  // write head marker
+  var headX = full ? W - 1 : head;
+  if (buf[headX] !== null) {
+    c.strokeStyle = 'rgba(255,255,255,0.2)';
+    c.lineWidth = 1;
+    c.beginPath(); c.moveTo(headX, 0); c.lineTo(headX, H); c.stroke();
+    c.fillStyle = color;
+    c.beginPath(); c.arc(headX, buf[headX], 2.5, 0, Math.PI*2); c.fill();
+  }
+}
+
+// ── BUILD DASHBOARD ──
+function buildDashboard() {
+  var grid = document.getElementById('db-grid');
+  grid.innerHTML = '';
+  DB_SENSORS.forEach(function(s, i) {
+    var card = document.createElement('div');
+    card.className = 'db-card';
+    card.id = 'db-card-' + i;
+    card.innerHTML =
+      '<div class="db-card-head">' +
+        '<span class="db-card-code" id="db-code-'+i+'" style="color:'+s.color+'">'+s.code+'</span>' +
+        '<span class="db-card-val" id="db-val-'+i+'" style="color:'+s.color+'">--</span>' +
+      '</div>' +
+      '<canvas class="db-card-canvas" id="db-canvas-'+i+'"></canvas>' +
+      '<div class="db-card-status" id="db-status-'+i+'"><span>'+s.name+'</span><span>OK</span></div>' +
+      '<div class="db-card-overlay" id="db-overlay-'+i+'"><div class="db-overlay-title" id="db-otitle-'+i+'"></div><div class="db-overlay-body" id="db-obody-'+i+'"></div></div>';
+    grid.appendChild(card);
+  });
+
+  // log card
+  var logCard = document.createElement('div');
+  logCard.className = 'db-card db-log-card';
+  logCard.id = 'db-log-card';
+  logCard.innerHTML =
+    '<div class="db-card-head db-log-head">' +
+      '<span class="db-card-code" style="color:rgba(255,255,255,0.4)">LOG</span>' +
+      '<span class="db-log-sub">Event history</span>' +
+    '</div>' +
+    '<div class="db-log-entries" id="db-log-entries"></div>';
+  grid.appendChild(logCard);
+
+  canvases = []; ctxs = [];
+  DB_SENSORS.forEach(function(s, i) {
+    var cv = document.getElementById('db-canvas-'+i);
+    canvases[i] = cv; ctxs[i] = cv.getContext('2d');
+  });
+  resizeCards();
+}
+
+function resizeCards() {
+  DB_SENSORS.forEach(function(s, i) {
+    var cv = canvases[i];
+    if (!cv) return;
+    cv.width = cv.offsetWidth; cv.height = cv.offsetHeight;
+  });
+  // reset pixel buffers on resize
+  pixelBufs = null; writeHeads = null; pixelFull = null;
+}
+
+// ── LOG ──
+function getBxlTime() {
+  return new Date().toLocaleString('en-GB', {
+    timeZone:'Europe/Brussels', day:'2-digit', month:'2-digit', year:'numeric',
+    hour:'2-digit', minute:'2-digit', second:'2-digit', hour12:false
+  });
+}
+
+function addLog(code, color, type, msg) {
+  var entries = document.getElementById('db-log-entries');
+  if (!entries) return;
+  var entry = document.createElement('div');
+  entry.className = 'db-log-entry ' + (type === 'error' ? 'db-log-alert' : type === 'warn' ? 'db-log-warn' : 'db-log-ok');
+  entry.innerHTML =
+    '<span class="db-log-ts">'+getBxlTime()+'</span>' +
+    '<span class="db-log-code" style="color:'+color+'">'+code+'</span>' +
+    '<span class="db-log-msg">'+msg+'</span>';
+  entries.insertBefore(entry, entries.firstChild);
+  while (entries.children.length > 6) entries.removeChild(entries.lastChild);
+}
+
+// ── CARD STATUS UPDATE ──
+function updateCardStatus(i, status, val) {
+  var s = DB_SENSORS[i];
+  var prev = sensorStatus[i];
+  sensorStatus[i] = status;
+
+  var color = status === 'error' ? '#E8341A' : status === 'warn' ? '#F59E0B' : s.color;
+  var codeEl = document.getElementById('db-code-'+i);
+  if (codeEl) codeEl.style.color = color;
+  var valEl = document.getElementById('db-val-'+i);
+  if (valEl) { valEl.style.color = color; }
+
+  var stEl = document.getElementById('db-status-'+i);
+  if (stEl) {
+    if (status === 'error') {
+      stEl.className = 'db-card-status err';
+      stEl.innerHTML = '<span>'+s.name+'</span><span>⚠ ERROR</span>';
+    } else if (status === 'warn') {
+      stEl.className = 'db-card-status warn';
+      stEl.innerHTML = '<span>'+s.name+'</span><span>△ WARN</span>';
+    } else {
+      stEl.className = 'db-card-status';
+      stEl.style.color = '';
+      stEl.innerHTML = '<span>'+s.name+'</span><span>OK</span>';
+    }
+  }
+
+  var card = document.getElementById('db-card-'+i);
+  var overlay = document.getElementById('db-overlay-'+i);
+  var otitle  = document.getElementById('db-otitle-'+i);
+  var obody   = document.getElementById('db-obody-'+i);
+  var lang = window.currentLang || 'en';
+
+  if (status === 'error' && prev !== 'error') {
+    if (card) card.classList.add('alerting');
+    var title = s['alertTitle'+(lang!=='en'?'_'+lang:'')] || s.alertTitle;
+    if (overlay) { overlay.classList.remove('recovering'); overlay.classList.add('visible'); }
+    if (otitle) otitle.textContent = '! ' + title;
+    if (obody)  obody.textContent  = s.code + ' out of safe range: ' + formatVal(s, val);
+    addLog(s.code, '#E8341A', 'error', title + ' (' + formatVal(s, val) + ')');
+  } else if (status === 'warn' && prev !== 'warn' && prev !== 'error') {
+    var wtitle = s['alertTitle_w'+(lang!=='en'?'_'+lang:'')] || s.alertTitle_w || ('WARNING: '+s.code);
+    if (overlay) { overlay.classList.remove('recovering'); overlay.classList.add('visible'); overlay.style.background='rgba(180,100,0,0.88)'; }
+    if (otitle) otitle.textContent = '△ ' + wtitle;
+    if (obody)  obody.textContent  = formatVal(s, val);
+    addLog(s.code, '#F59E0B', 'warn', wtitle + ' (' + formatVal(s, val) + ')');
+  } else if (status === 'ok' && prev !== 'ok') {
+    if (card) card.classList.remove('alerting');
+    if (overlay) { overlay.classList.add('recovering'); overlay.style.background=''; }
+    if (otitle) otitle.textContent = '✓ RECOVERED';
+    if (obody)  obody.textContent  = s.name + ' back within normal range.';
+    setTimeout(function(){
+      if (overlay) overlay.classList.remove('visible','recovering');
+    }, 2500);
+    addLog(s.code, '#4ADE80', 'ok', 'Recovered — ' + formatVal(s, val));
+  }
+  checkCritical();
+}
+
+function formatVal(s, val) {
+  if (s.code === 'VIB') return val.toFixed(2) + ' g';
+  if (s.code === 'TILT') return val.toFixed(1) + '°';
+  if (Number.isInteger(val)) return val + ' ' + s.unit;
+  return val.toFixed(1) + ' ' + s.unit;
+}
+
+// ── RENDER LOOP ──
+var phase = 0;
+var canvases = [], ctxs = [];
+var lastClockTick = 0;
+
+function updateClock() {
+  var el = document.getElementById('db-clock');
+  if (!el) return;
+  el.textContent = new Date().toLocaleString('en-GB', {
+    timeZone:'Europe/Brussels', day:'2-digit', month:'2-digit', year:'numeric',
+    hour:'2-digit', minute:'2-digit', second:'2-digit', hour12:false
+  });
+}
+
+function renderLoop(ts) {
+  phase += 0.04;
+  if (!ts) ts = 0;
+  if (ts - lastClockTick > 1000) { updateClock(); lastClockTick = ts; }
+
+  DB_SENSORS.forEach(function(s, i) {
+    var cv = canvases[i];
+    var c  = ctxs[i];
+    if (!cv || !c || !cv.width || !cv.height) return;
+    var W = cv.width, H = cv.height;
+
+    // drift sensorRealVal toward sensorTarget
+    var diff = sensorTarget[i] - sensorRealVal[i];
+    sensorRealVal[i] += diff * 0.035;
+
+    var val    = sensorRealVal[i];
+    var status = evalStatus(s, val);
+    updateCardStatus(i, status, val);
+
+    // update value display
+    var valEl = document.getElementById('db-val-'+i);
+    if (valEl) valEl.textContent = formatVal(s, val);
+
+    // pixel buffer
+    if (!pixelBufs) {
+      pixelBufs  = DB_SENSORS.map(function(){ return []; });
+      writeHeads = DB_SENSORS.map(function(){ return 0; });
+      pixelFull  = DB_SENSORS.map(function(){ return false; });
+    }
+    var buf = pixelBufs[i];
+    if (buf.length !== W) {
+      pixelBufs[i] = new Array(W).fill(null);
+      buf = pixelBufs[i];
+      writeHeads[i] = 0;
+      pixelFull[i] = false;
+    }
+
+    var newY = sensorYValue(s, val, W, H);
+    if (!pixelFull[i]) {
+      buf[writeHeads[i]] = newY;
+      writeHeads[i]++;
+      if (writeHeads[i] >= W) { pixelFull[i] = true; writeHeads[i] = W - 1; }
+    } else {
+      for (var _s = 0; _s < W - 1; _s++) buf[_s] = buf[_s+1];
+      buf[W-1] = newY;
+    }
+
+    c.clearRect(0,0,W,H);
+    c.fillStyle = '#0A0A0A'; c.fillRect(0,0,W,H);
+    c.strokeStyle='rgba(255,255,255,0.03)';c.lineWidth=1;
+    for(var r=1;r<4;r++){var gy=H/4*r;c.beginPath();c.moveTo(0,gy);c.lineTo(W,gy);c.stroke();}
+    drawSensorBuf(c, W, H, buf, s, status, val, i);
+  });
+  requestAnimationFrame(renderLoop);
+}
+
+window.addEventListener('resize', function(){ setTimeout(resizeCards, 100); });
+
+window.addEventListener('DOMContentLoaded', function(){
+  buildDashboard();
+  setTimeout(function(){
+    resizeCards();
+    requestAnimationFrame(renderLoop);
+    setTimeout(function(){ startNormalCycle(); startCriticalTimer(); }, 3000);
+  }, 150);
+});
+
+// ── TRANSLATIONS ──
+var translations = {
+  en: {
+    "nav-how":"Signal chain","nav-measure":"Monitor","nav-contact":"Contact",
+    "hero-id":"PREDICTIVE MONITORING",
+    "hero-h1":"I tell you<br>what's coming<br><em>before it costs you.</em>",
+    "hero-tagline":"Sensor-based monitoring that translates raw measurements into concrete warnings \u2014 before downtime, energy loss, or an emergency repair bill.",
+    "hero-cta1":"Get in touch","hero-cta2":"How it works",
+    "signal-monitoring":"MONITORING",
+    "s1-title":"What I do",
+    "s1-intro":"I install sensors on your assets, read the data continuously, and <strong>translate measurements into a concrete warning</strong> \u2014 before it costs you money.",
+    "c1-t":"Asset","c1-s":"Motor, pump, compressor, storage unit",
+    "c2-t":"Sensor","c2-s":"Reads physical state continuously",
+    "c3-t":"Data stream","c3-s":"Raw values, 24/7",
+    "c4-t":"Interpretation","c4-s":"Thresholds, drift, anomaly patterns",
+    "c5-t":"Warning","c5-s":"Concrete alert before failure occurs",
+    "s1-sub":"Sensors alone do nothing. Data alone does nothing. The value is in the interpretation \u2014 understanding what the numbers mean for your specific equipment and turning that into a signal you can act on.",
+    "s2-title":"What it prevents",
+    "cc1-tag":"01 \u2014 DOWNTIME","cc1-t":"Unplanned production stops","cc1-p":"A vibration anomaly caught three weeks early is a scheduled maintenance window. Caught after the fact, it is a production halt at the worst possible moment.",
+    "cc2-tag":"02 \u2014 ENERGY","cc2-t":"Invisible energy loss","cc2-p":"Slow thermal drift rarely triggers an alarm \u2014 until the invoice arrives. Continuous monitoring makes it visible before it compounds.",
+    "cc3-tag":"03 \u2014 COMPLIANCE","cc3-t":"Regulatory exposure","cc3-p":"An out-of-range reading in a controlled environment can carry consequences. Knowing in real time gives you a documented response \u2014 not a gap in your records.",
+    "cc4-tag":"04 \u2014 REPAIR","cc4-t":"Emergency call-out costs","cc4-p":"The most expensive repair is always the one that could not wait. Predictive signals let you plan on your schedule \u2014 not on failure\u2019s schedule.",
+    "s3-title":"Process",
+    "p1-t":"Understand your installation","p1-p":"I visit your site, identify critical assets, and determine what actually needs to be monitored. No standard packages \u2014 only what makes sense for your specific situation.",
+    "p2-t":"Install & integrate","p2-p":"I wire and configure the sensors myself and connect them to a microcontroller that reads them continuously. Hardware to firmware \u2014 done in one intervention.",
+    "p3-t":"Define normal & set alert logic","p3-p":"I establish baseline behaviour for your equipment and configure thresholds and triggers that produce real, actionable warnings \u2014 not just numbers on a screen.",
+    "p4-t":"Live dashboard + ongoing support","p4-p":"You get a live view of your key metrics. When something drifts outside normal bounds, you are alerted before it becomes a problem. I remain available to interpret, adjust, and expand.",
+    "s4-title":"What I monitor","s4-intro":"Examples of sensor types I work with \u2014 the list is not fixed. Every installation starts from your specific assets and what actually needs to be watched.",
+    "m1-h":"Temperature","m1-p":"Catches thermal drift on motors, switchgear, and storage before it becomes damage.","m1-s":"\u2192 Overheating / thermal runaway / spoilage",
+    "m2-h":"Humidity","m2-p":"Detects moisture before it corrodes contacts, degrades insulation, or breaches compliance.","m2-s":"\u2192 Corrosion / insulation failure / non-compliance",
+    "m3-h":"Vibration","m3-p":"Monitors amplitude and pattern in rotating machinery \u2014 not just whether something shakes.","m3-s":"\u2192 Bearing failure / imbalance / loosening",
+    "m4-h":"Tilt & acceleration","m4-p":"6-axis IMU detects structural shift, impact events, or orientation change before visual inspection.","m4-s":"\u2192 Structural drift / g-force event / mounting failure",
+    "m5-h":"Light & occupancy","m5-p":"Flags energy waste, unexpected access, or environmental changes in sensitive zones.","m5-s":"\u2192 Energy waste / unauthorised access",
+    "m6-h":"Short distance","m6-p":"Object presence, part positioning, close-range level detection. Contactless, no wear.","m6-s":"\u2192 Misalignment / presence / fill level",
+    "m7-h":"Long distance","m7-p":"Tank levels, silo fill height, gate or barrier status over longer ranges. Continuous, non-contact.","m7-s":"\u2192 Overflow / empty tank / intrusion",
+    "s5-title":"Sectors",
+    "sec1":"Manufacturing & Production","sec2":"Food & Cold Chain","sec3":"HVAC & Building Systems","sec4":"Water & Waste Treatment","sec5":"Agricultural Technology","sec6":"Airport & Aviation","sec7":"Research & Laboratories","sec8":"Logistics & Warehousing","sec9":"Startups & Prototyping","sec10":"Small Industrial Facilities",
+    "s6-title":"Contact","c-h2":"Let\u2019s talk about your installation.","c-p":"Tell me what you\u2019re running, what worries you, or what has already gone wrong once too often. I\u2019ll tell you honestly whether sensor monitoring can help \u2014 and what it would take.",
+    "f-fname":"First name","f-lname":"Last name","f-email":"Email","f-company":"Company","f-company-ph":"Your company","f-msg":"Message","f-msg-ph":"Tell me what you are running and what concerns you...","f-consent":"I confirm I am a real person and agree to be contacted regarding this enquiry.","f-submit":"Send message",
+    "tut-1":"Swipe left or right to switch sensors",
+    "tut-2":"Drag the slider to change the reading",
+    "tut-3":"Push past the threshold to trigger an alert"
+  },
+  fr: {
+    "nav-how":"Cha\u00eene de signal","nav-measure":"Monitoring","nav-contact":"Contact",
+    "hero-id":"MONITORING PR\u00c9DICTIF",
+    "hero-h1":"Je vous dis<br>ce qui arrive<br><em>avant que \u00e7a co\u00fbte.</em>",
+    "hero-tagline":"Monitoring par capteurs qui traduit les mesures brutes en avertissements concrets \u2014 avant l\u2019arr\u00eat, la perte d\u2019\u00e9nergie ou la facture d\u2019urgence.",
+    "hero-cta1":"Me contacter","hero-cta2":"Comment \u00e7a marche",
+    "signal-monitoring":"SURVEILLANCE",
+    "s1-title":"Ce que je fais","s1-intro":"J\u2019installe des capteurs sur vos actifs, je lis les donn\u00e9es en continu et je <strong>traduis les mesures en avertissement concret</strong> \u2014 avant que cela vous co\u00fbte.",
+    "c1-t":"Actif","c1-s":"Moteur, pompe, compresseur, stockage",
+    "c2-t":"Capteur","c2-s":"Lit l\u2019\u00e9tat physique en continu",
+    "c3-t":"Flux de donn\u00e9es","c3-s":"Valeurs brutes, 24h/24",
+    "c4-t":"Interpr\u00e9tation","c4-s":"Seuils, d\u00e9rive, anomalies",
+    "c5-t":"Alerte","c5-s":"Avertissement concret avant la panne",
+    "s1-sub":"Les capteurs seuls ne font rien. Les donn\u00e9es seules ne font rien. La valeur est dans l\u2019interpr\u00e9tation \u2014 comprendre ce que les chiffres signifient et les transformer en signal actionnable.",
+    "s2-title":"Ce que \u00e7a \u00e9vite",
+    "cc1-tag":"01 \u2014 TEMPS D\u2019ARR\u00caT","cc1-t":"Arr\u00eats de production non planifi\u00e9s","cc1-p":"Une anomalie de vibration d\u00e9tect\u00e9e trois semaines avant est une fen\u00eatre de maintenance planifi\u00e9e. D\u00e9tect\u00e9e apr\u00e8s, c\u2019est un arr\u00eat au pire moment.",
+    "cc2-tag":"02 \u2014 \u00c9NERGIE","cc2-t":"Perte d\u2019\u00e9nergie invisible","cc2-p":"Une d\u00e9rive thermique lente ne d\u00e9clenche rarement une alarme \u2014 jusqu\u2019\u00e0 la facture. Le monitoring continu la rend visible.",
+    "cc3-tag":"03 \u2014 CONFORMIT\u00c9","cc3-t":"Exposition r\u00e9glementaire","cc3-p":"Une valeur hors plage peut avoir des cons\u00e9quences. Savoir en temps r\u00e9el vous donne une r\u00e9ponse document\u00e9e.",
+    "cc4-tag":"04 \u2014 R\u00c9PARATION","cc4-t":"Co\u00fbts d\u2019intervention d\u2019urgence","cc4-p":"La r\u00e9paration la plus ch\u00e8re est celle qui ne pouvait pas attendre. Les signaux pr\u00e9dictifs vous laissent planifier.",
+    "s3-title":"Processus","p1-t":"Comprendre votre installation","p1-p":"Je visite votre site, identifie les actifs critiques et d\u00e9termine ce qui doit \u00eatre surveill\u00e9. Pas de packages standard.",
+    "p2-t":"Installer & int\u00e9grer","p2-p":"Je c\u00e2ble et configure les capteurs moi-m\u00eame. Du mat\u00e9riel au firmware, en une seule intervention.",
+    "p3-t":"D\u00e9finir le normal & les alertes","p3-p":"J\u2019\u00e9tablis le comportement de r\u00e9f\u00e9rence et configure les seuils qui produisent de vraies alertes actionnables.",
+    "p4-t":"Dashboard en direct + support","p4-p":"Vous avez une vue en direct. Quand quelque chose d\u00e9rive, vous \u00eates alert\u00e9 avant le probl\u00e8me. Je reste disponible.",
+    "s4-title":"Ce que je monitore","s4-intro":"Exemples de types de capteurs \u2014 la liste n\u2019est pas fix\u00e9e. Chaque installation part de vos actifs sp\u00e9cifiques.",
+    "m1-h":"Temp\u00e9rature","m1-p":"D\u00e9rive thermique avant dommages.","m1-s":"\u2192 Surchauffe / emballement / alt\u00e9ration",
+    "m2-h":"Humidit\u00e9","m2-p":"Humidit\u00e9 avant corrosion ou non-conformit\u00e9.","m2-s":"\u2192 Corrosion / isolation / conformit\u00e9",
+    "m3-h":"Vibrations","m3-p":"Amplitude et motif dans les machines tournantes.","m3-s":"\u2192 Roulement / d\u00e9s\u00e9quilibre / desserrage",
+    "m4-h":"Inclinaison & acc\u00e9l\u00e9ration","m4-p":"IMU 6 axes \u2014 d\u00e9placement structural ou choc.","m4-s":"\u2192 D\u00e9rive / g-force / fixation",
+    "m5-h":"Lumi\u00e8re & occupation","m5-p":"Gaspillage \u00e9nerg\u00e9tique ou acc\u00e8s inattendu.","m5-s":"\u2192 Gaspillage / acc\u00e8s non autoris\u00e9",
+    "m6-h":"Distance courte","m6-p":"Pr\u00e9sence, positionnement, niveau proche. Sans contact.","m6-s":"\u2192 D\u00e9salignement / pr\u00e9sence / niveau",
+    "m7-h":"Distance longue","m7-p":"Niveaux de cuves, silos, portails. Continu, sans contact.","m7-s":"\u2192 D\u00e9bordement / cuve vide / intrusion",
+    "s5-title":"Secteurs",
+    "sec1":"Industrie & production","sec2":"Alimentation & froid","sec3":"HVAC & b\u00e2timents","sec4":"Eau & d\u00e9chets","sec5":"Agrotechnologie","sec6":"A\u00e9roports & aviation","sec7":"Recherche & laboratoires","sec8":"Logistique & entreposage","sec9":"Startups & prototypage","sec10":"Petites installations industrielles",
+    "s6-title":"Contact","c-h2":"Parlons de votre installation.","c-p":"Dites-moi ce que vous faites tourner ou ce qui vous pr\u00e9occupe. Je vous dirai honn\u00eAtement si le monitoring peut aider.",
+    "f-fname":"Pr\u00e9nom","f-lname":"Nom","f-email":"E-mail","f-company":"Entreprise","f-company-ph":"Votre entreprise","f-msg":"Message","f-msg-ph":"D\u00e9crivez votre installation...","f-consent":"Je confirme \u00eatre une vraie personne et accepte d\u2019\u00eatre contact\u00e9.","f-submit":"Envoyer",
+    "tut-1":"Glissez à gauche ou à droite pour changer de capteur",
+    "tut-2":"Déplacez le curseur pour modifier la mesure",
+    "tut-3":"Dépassez le seuil pour déclencher une alerte"
+  },
+  nl: {
+    "nav-how":"Signaalchain","nav-measure":"Monitor","nav-contact":"Contact",
+    "hero-id":"PREDICTIEF MONITORING",
+    "hero-h1":"Ik vertel u<br>wat eraan komt<br><em>voor het u geld kost.</em>",
+    "hero-tagline":"Sensormonitoring die ruwe metingen vertaalt naar concrete waarschuwingen \u2014 voor stilstand, energieverlies of een dringende reparatiefactuur.",
+    "hero-cta1":"Neem contact op","hero-cta2":"Hoe het werkt",
+    "signal-monitoring":"MONITORING",
+    "s1-title":"Wat ik doe","s1-intro":"Ik installeer sensoren op uw machines, lees de data continu en <strong>vertaal metingen naar een concrete waarschuwing</strong> \u2014 voor het u geld kost.",
+    "c1-t":"Actief","c1-s":"Motor, pomp, compressor, opslag",
+    "c2-t":"Sensor","c2-s":"Leest fysieke toestand continu",
+    "c3-t":"Datastroom","c3-s":"Ruwe waarden, 24/7",
+    "c4-t":"Interpretatie","c4-s":"Drempels, drift, anomalie\u00ebn",
+    "c5-t":"Waarschuwing","c5-s":"Concrete melding voor de storing",
+    "s1-sub":"Sensoren alleen doen niets. Data alleen doet niets. De waarde zit in de interpretatie \u2014 begrijpen wat de getallen betekenen en dat omzetten in een signaal waarop u kunt handelen.",
+    "s2-title":"Wat het voorkomt",
+    "cc1-tag":"01 \u2014 STILSTAND","cc1-t":"Ongeplande productiestops","cc1-p":"Een trillinganomalie drie weken op voorhand gevangen is een gepland onderhoudsvenster. Te laat ontdekt is het een productiestop op het slechtste moment.",
+    "cc2-tag":"02 \u2014 ENERGIE","cc2-t":"Onzichtbaar energieverlies","cc2-p":"Trage thermische drift triggert zelden een alarm \u2014 tot de factuur. Continu monitoring maakt het zichtbaar voor het kost.",
+    "cc3-tag":"03 \u2014 COMPLIANCE","cc3-t":"Regulatoire blootstelling","cc3-p":"Een waarde buiten bereik kan gevolgen hebben. Realtime weten geeft u een gedocumenteerd antwoord.",
+    "cc4-tag":"04 \u2014 REPARATIE","cc4-t":"Dringende interventiekosten","cc4-p":"De duurste reparatie is altijd de reparatie die niet kon wachten. Predictieve signalen laten u plannen op uw schema.",
+    "s3-title":"Proces","p1-t":"Uw installatie begrijpen","p1-p":"Ik bezoek uw site, identificeer kritieke activa en bepaal wat er echt gemonitord moet worden.",
+    "p2-t":"Installeren & integreren","p2-p":"Ik bekabel en configureer de sensoren zelf. Hardware tot firmware, in \u00e9\u00e9n interventie.",
+    "p3-t":"Normaal defini\u00ebren & alertlogica","p3-p":"Ik stel het referentiegedrag vast en configureer drempelwaarden die echte waarschuwingen genereren.",
+    "p4-t":"Live dashboard + support","p4-p":"U krijgt een live overzicht. Wanneer iets buiten de norm gaat, wordt u gewaarschuwd. Ik blijf beschikbaar.",
+    "s4-title":"Wat ik monitor","s4-intro":"Voorbeelden van sensortypes \u2014 de lijst ligt niet vast. Elke installatie vertrekt van uw specifieke activa.",
+    "m1-h":"Temperatuur","m1-p":"Thermische drift voor schade ontstaat.","m1-s":"\u2192 Oververhitting / wegloop / bederf",
+    "m2-h":"Vochtigheid","m2-p":"Vocht voor corrosie of non-conformiteit.","m2-s":"\u2192 Corrosie / isolatie / compliance",
+    "m3-h":"Trillingen","m3-p":"Amplitude en patroon in roterende machines.","m3-s":"\u2192 Lagerschade / onbalans / losraken",
+    "m4-h":"Kanteling & versnelling","m4-p":"6-assige IMU \u2014 structurele verschuiving of schokgebeurtenis.","m4-s":"\u2192 Structurele drift / g-force / bevestiging",
+    "m5-h":"Licht & bezetting","m5-p":"Energieverspilling of onverwachte toegang.","m5-s":"\u2192 Energieverspilling / ongeautoriseerde toegang",
+    "m6-h":"Korte afstand","m6-p":"Objectaanwezigheid, positionering, nabij niveau. Contactloos.","m6-s":"\u2192 Uitlijning / aanwezigheid / niveau",
+    "m7-h":"Verre afstand","m7-p":"Tankniveaus, silo's, poorten over grotere afstanden. Continu.","m7-s":"\u2192 Overloop / lege tank / inbraak",
+    "s5-title":"Sectoren",
+    "sec1":"Industrie & productie","sec2":"Voeding & koude keten","sec3":"HVAC & gebouwtechniek","sec4":"Water & afvalverwerking","sec5":"Agrotechnologie","sec6":"Luchthaven & luchtvaart","sec7":"Onderzoek & laboratoria","sec8":"Logistiek & opslag","sec9":"Startups & prototyping","sec10":"Kleine industriele installaties",
+    "s6-title":"Contact","c-h2":"Laten we praten over uw installatie.","c-p":"Vertel me wat u draait of wat u zorgen baart. Ik vertel u eerlijk of sensormonitoring kan helpen.",
+    "f-fname":"Voornaam","f-lname":"Naam","f-email":"E-mail","f-company":"Bedrijf","f-company-ph":"Uw bedrijf","f-msg":"Bericht","f-msg-ph":"Vertel me wat u draait en wat u zorgen baart...","f-consent":"Ik bevestig een echte persoon te zijn en ga akkoord met contact.","f-submit":"Versturen",
+    "tut-1":"Veeg links of rechts om van sensor te wisselen",
+    "tut-2":"Sleep de schuifbalk om de meting te wijzigen",
+    "tut-3":"Ga voorbij de drempel om een melding te activeren"
+  }
+};
+
+var currentLang = 'en';
+function setLang(lang) {
+  currentLang = lang;
+  document.documentElement.lang = lang;
+  document.querySelectorAll('[data-i18n]').forEach(function(el) {
+    var k = el.getAttribute('data-i18n');
+    if (translations[lang][k] !== undefined) el.innerHTML = translations[lang][k];
+  });
+  document.querySelectorAll('[data-i18n-ph]').forEach(function(el) {
+    var k = el.getAttribute('data-i18n-ph');
+    if (translations[lang][k] !== undefined) el.placeholder = translations[lang][k];
+  });
+  // update static lang buttons
+  ['en','fr','nl'].forEach(function(l){
+    var b = document.getElementById('lang-btn-'+l);
+    if(b) b.classList.toggle('active', l===lang);
+  });
+  var opts = document.getElementById('lang-options');
+  opts.innerHTML = '';
+  ['en','fr','nl'].filter(function(l){return l!==lang}).forEach(function(l){
+    var b=document.createElement('button'); b.className='lang-opt'; b.textContent=l.toUpperCase();
+    b.onclick=function(){selectLang(l);}; opts.appendChild(b);
+  });
+}
+function handleSubmit(e) {
+  e.preventDefault();
+  if(document.getElementById('website').value.trim()) return;
+  var fname=document.getElementById('fname').value.trim();
+  var lname=document.getElementById('lname').value.trim();
+  var email=document.getElementById('email').value.trim();
+  var company=document.getElementById('company').value.trim();
+  var message=document.getElementById('message').value.trim();
+  if(!fname||!email||!message){alert('Please fill in your name, email, and message.');return;}
+  var subj=encodeURIComponent('Website enquiry from '+fname+' '+lname);
+  var body=encodeURIComponent('Name: '+fname+' '+lname+'\nEmail: '+email+'\n'+(company?'Company: '+company+'\n':'')+'\nMessage:\n'+message);
+  window.location.href='mailto:miguel.medina@amm-se.be?subject='+subj+'&body='+body;
+  var btn=e.target.querySelector('[type=submit]'); btn.textContent='...'; btn.style.background='var(--amber)';
+}
+</script>
+</body>
+</html>
